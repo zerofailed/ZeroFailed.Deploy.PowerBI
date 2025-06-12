@@ -1,3 +1,7 @@
+# <copyright file="powerbi.tasks.ps1" company="Endjin Limited">
+# Copyright (c) Endjin Limited. All rights reserved.
+# </copyright>
+
 task deployPowerBISharedCloudConnection {
 
     $token = Get-AzAccessToken -AsSecureString -ResourceUrl 'https://api.fabric.microsoft.com'

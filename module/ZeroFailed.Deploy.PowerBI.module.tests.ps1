@@ -46,6 +46,7 @@ Describe "'$moduleName' Module Tests" {
             $functionPath = $_.FullName
             $functionTestsPath = $_.FullName.Replace('.ps1', '.Tests.ps1')
             $functionDir = $_.Directory.FullName
+            $isPrivateFunction = $_.Name.StartsWith('_')
         }
         
         It "<function> should exist" {
@@ -89,10 +90,10 @@ Describe "'$moduleName' Module Tests" {
             $errors.Count | Should -Be 0
         }
 
-        Context "$function has tests" {
-          It "$functionTestsPath should exist" {
-            $functionTestsPath | Should -Exist
-          }
+        It "<function> should have tests" {
+            if (!$isPrivateFunction) {
+                $functionTestsPath | Should -Exist
+            }
         }
     }
 

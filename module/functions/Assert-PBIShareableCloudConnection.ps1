@@ -7,13 +7,30 @@
 Ensures that the specified Power BI shareable cloud connection exists.
 
 .DESCRIPTION
-Ensures that the specified Power BI shareable cloud connection exists.
+Ensures that the specified Power BI shareable cloud connection exists. If the connection already exists, the function updates it;
+otherwise, it creates a new connection using the provided parameters.
 
 .PARAMETER DisplayName
 The display name of the Power BI shareable cloud connection.
 
 .OUTPUTS
+Returns the response from the Power BI API call.
 
+.EXAMPLE
+# Example usage to update an existing connection or create a new one:
+$secureToken = ConvertTo-SecureString "token" -AsPlainText -Force
+$secureSecret = ConvertTo-SecureString "secret" -AsPlainText -Force
+
+$response = Assert-PBIShareableCloudConnection `
+    -DisplayName "MyConnection" `
+    -ConnectionType "ExampleType" `
+    -Parameters @{ key = "value" } `
+    -ServicePrincipalClientId "clientId" `
+    -ServicePrincipalSecret $secureSecret `
+    -TenantId "tenantId" `
+    -AccessToken $secureToken
+
+Write-Output $response
 #>
 
 function Assert-PBIShareableCloudConnection
@@ -29,65 +46,6 @@ function Assert-PBIShareableCloudConnection
         [string] $TenantId,
         [securestring] $AccessToken
     )
-
-    function _GenerateCreateBody {
-
-        param (
-            $DisplayName,
-            $ConnectionType,
-            $Parameters,
-            $ServicePrincipalClientId,
-            $ServicePrincipalSecret,
-            $TenantId
-        )
-    
-        $createBody = @{
-            connectivityType = "ShareableCloud"
-            displayName = $DisplayName
-            connectionDetails = @{
-                type = $ConnectionType
-                creationMethod = $ConnectionType
-                parameters = $Parameters
-            }
-            privacyLevel = "Organizational"
-            credentialDetails = @{
-              singleSignOnType = "None"
-              connectionEncryption = "NotEncrypted"
-              skipTestConnection = $false
-              credentials = @{
-                credentialType = "ServicePrincipal"
-                servicePrincipalClientId = $ServicePrincipalClientId
-                servicePrincipalSecret = $ServicePrincipalSecret
-                tenantId = $TenantId
-              }
-            }
-        }
-        
-        return $createBody
-    }
-    
-    function _GenerateUpdateBody {
-    
-        param(
-            $ServicePrincipalClientId,
-            $ServicePrincipalSecret,
-            $TenantId
-        )
-    
-        $updateBody = @{
-            connectivityType = "ShareableCloud"
-            credentialDetails = @{
-              credentials = @{
-                credentialType = "ServicePrincipal"
-                servicePrincipalClientId = $ServicePrincipalClientId
-                servicePrincipalSecret = $ServicePrincipalSecret
-                tenantId = $TenantId
-              }
-            }
-        }
-    
-        return $updateBody
-    }
 
     $splat = @{ 
         "Uri" = "https://api.fabric.microsoft.com/v1/connections" 
