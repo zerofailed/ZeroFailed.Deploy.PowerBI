@@ -9,12 +9,12 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
     foreach ($connection in $cloudConnection) {    
 
         $splat = @{
-            DisplayName = {$connection.displayName}
+            DisplayName = $connection.displayName | Resolve-Value
             ConnectionType = $connection.connectionType
             Parameters = $connection.parameters | Resolve-Value
-            ServicePrincipalClientId = $connection.servicePrincipalClientId
+            ServicePrincipalClientId = $connection.servicePrincipalClientId | Resolve-Value
             ServicePrincipalSecret = $connection.servicePrincipalSecret | Resolve-Value
-            TenantId = $connection.tenantId
+            TenantId = $connection.tenantId | Resolve-Value
             AccessToken = $token.Token
         }
 
