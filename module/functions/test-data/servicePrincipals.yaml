@@ -1,0 +1,13 @@
+# Service Principals Configuration
+version: '1.0'
+
+servicePrincipals:
+  development:
+    clientId: 70982f14-17c2-4eb3-867d-7e68b9a902b7
+    secretUrl: https://endjintest.vault.azure.net/secrets/dev-connection-secret/
+    tenantId: 1c89d1da-a483-414f-ac8c-ccaf199db0a7
+
+  test:
+    clientId: 282de1ed-2c46-4b5b-ac1d-06bcf3b19128
+    secretUrl: https://endjintest.vault.azure.net/secrets/test-connection-secret/
+    tenantId: 1c89d1da-a483-414f-ac8c-ccaf199db0a7

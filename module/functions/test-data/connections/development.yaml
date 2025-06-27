@@ -1,0 +1,29 @@
+# Development Environment Cloud Connections
+version: '1.0'
+
+cloudConnections:
+  # Development Blob Storage using shared service principal and target
+  - displayName: Development Blob Storage
+    type: AzureBlobs
+    useServicePrincipal: development
+    target:
+      useTarget: blobStorage.dev
+    permissions:
+      owners:
+        - jessica.hill@endjin.com
+      users:
+        - dev.team@endjin.com
+      reshareUsers: []
+
+  # Development SQL using shared service principal and target
+  - displayName: Development SQL Database
+    type: SQLServer
+    useServicePrincipal: development
+    target:
+      useTarget: sqlServer.dev
+    permissions:
+      owners:
+        - jessica.hill@endjin.com
+      users:
+        - dev.team@endjin.com
+      reshareUsers: []
