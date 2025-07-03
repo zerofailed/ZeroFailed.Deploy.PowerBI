@@ -2,22 +2,29 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
+. $PSScriptRoot/powerbi.properties.ps1
 task deployPowerBISharedCloudConnection -After ProvisionCore {
 
     $token = Get-AzAccessToken -AsSecureString -ResourceUrl 'https://api.fabric.microsoft.com'
+    $cloudConnections = Resolve-CloudConnections -ConfigPath $powerBIconfig
 
-    foreach ($connection in $cloudConnection) {    
+    foreach ($connection in $cloudConnections) { 
 
-        $splat = @{
-            DisplayName = $connection.displayName | Resolve-Value
-            ConnectionType = $connection.connectionType
-            Parameters = $connection.parameters | Resolve-Value
-            ServicePrincipalClientId = $connection.servicePrincipalClientId | Resolve-Value
-            ServicePrincipalSecret = $connection.servicePrincipalSecret | Resolve-Value
-            TenantId = $connection.tenantId | Resolve-Value
-            AccessToken = $token.Token
+        if (($connection | Get-Member -Name servicePrincipal) -and $connection.servicePrincipal.ContainsKey("secretUrl")) {
+
+            $secretValue = Get-AzKeyVaultSecret -Id $connection.servicePrincipal.secretUrl
+
+            $splat = @{
+                DisplayName = $connection.displayName 
+                ConnectionType = $connection.type
+                Parameters = $connection.target 
+                ServicePrincipalClientId = $connection.servicePrincipal.clientId 
+                ServicePrincipalSecret = $secretValue.SecretValue
+                TenantId = $connection.servicePrincipal.tenantId 
+                AccessToken = $token.Token
+            }
+
+            Assert-PBIShareableCloudConnection @splat
         }
-
-        Assert-PBIShareableCloudConnection @splat
     }
 }

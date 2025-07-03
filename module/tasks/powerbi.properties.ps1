@@ -2,6 +2,9 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
+# Synopsis: Power BI properties for shared cloud connections.
+$powerBIconfig = "./pbiconfig/config.yaml"
+
 # Synopsis: Deploys the specified shared cloud connections to the Power BI Service.
 $cloudConnection = @(
     # @{ 
