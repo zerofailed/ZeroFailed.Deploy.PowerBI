@@ -45,8 +45,12 @@ Describe "Remove-PBICloudConnectionPermission" {
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
             Mock -CommandName Invoke-RestMethod -MockWith {
-                $exception = New-Object System.Net.WebException
-                $exception | Add-Member -NotePropertyName Response -NotePropertyValue (New-Object PSObject -Property @{ StatusCode = @{ value__ = 404 } })
+                # Create a proper WebException with 404 status
+                $response = [System.Net.HttpWebResponse]::new()
+                $response | Add-Member -MemberType NoteProperty -Name StatusCode -Value ([System.Net.HttpStatusCode]::NotFound) -Force
+                
+                $exception = [System.Net.WebException]::new("Not Found", $null, [System.Net.WebExceptionStatus]::ProtocolError, $response)
+                $exception | Add-Member -MemberType NoteProperty -Name Response -Value @{ StatusCode = @{ value__ = 404 } } -Force
                 throw $exception
             }
 
@@ -69,8 +73,8 @@ Describe "Remove-PBICloudConnectionPermission" {
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
             Mock -CommandName Invoke-RestMethod -MockWith {
-                $exception = New-Object System.Net.WebException("Forbidden")
-                $exception | Add-Member -NotePropertyName Response -NotePropertyValue (New-Object PSObject -Property @{ StatusCode = @{ value__ = 403 } })
+                $exception = [System.Net.WebException]::new("Forbidden")
+                $exception | Add-Member -MemberType NoteProperty -Name Response -Value @{ StatusCode = @{ value__ = 403 } } -Force
                 throw $exception
             }
 
@@ -112,8 +116,8 @@ Describe "Remove-PBICloudConnectionPermission" {
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
             Mock -CommandName Invoke-RestMethod -MockWith {
-                $exception = New-Object System.Net.WebException("Internal Server Error")
-                $exception | Add-Member -NotePropertyName Response -NotePropertyValue (New-Object PSObject -Property @{ StatusCode = @{ value__ = 500 } })
+                $exception = [System.Net.WebException]::new("Internal Server Error")
+                $exception | Add-Member -MemberType NoteProperty -Name Response -Value @{ StatusCode = @{ value__ = 500 } } -Force
                 throw $exception
             }
 

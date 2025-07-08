@@ -127,6 +127,7 @@ function Remove-PBICloudConnectionPermissionBatch
         [string] $CloudConnectionId,
         
         [Parameter(Mandatory=$true)]
+        [AllowEmptyCollection()]
         [object[]] $RoleAssignments,
         
         [Parameter(Mandatory=$true)]
