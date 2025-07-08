@@ -11,6 +11,8 @@ cloudConnections:
     permissions:
       owners:
         - jessica.hill@endjin.com
+        - principalId: "f3498fd9-cff0-44a9-991c-c017f481adf0"
+          principalType: "ServicePrincipal"
       users:
         - dev.team@endjin.com
       reshareUsers: []
@@ -26,4 +28,7 @@ cloudConnections:
         - jessica.hill@endjin.com
       users:
         - dev.team@endjin.com
-      reshareUsers: []
+        - principalId: "282de1ed-2c46-4b5b-ac1d-06bcf3b19128"
+          principalType: "Group"
+      reshareUsers:
+        - power.users@endjin.com
