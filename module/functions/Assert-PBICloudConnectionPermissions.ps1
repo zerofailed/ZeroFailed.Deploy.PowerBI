@@ -112,4 +112,4 @@ function Assert-PBICloudConnectionPermissions
     return $response
 }
 
-Assert-PBICloudConnectionPermissions -CloudConnectionId "a60de636-56cf-4775-8217-76bb5b33bbb3" -AssigneePrincipalId "f3498fd9-cff0-44a9-991c-c017f481adf0" -AccessToken $token.Token -AssigneePrincipalRole "User" -AssigneePrincipalType "User"
+# Assert-PBICloudConnectionPermissions -CloudConnectionId "a60de636-56cf-4775-8217-76bb5b33bbb3" -AssigneePrincipalId "f3498fd9-cff0-44a9-991c-c017f481adf0" -AccessToken $token.Token -AssigneePrincipalRole "User" -AssigneePrincipalType "User"
