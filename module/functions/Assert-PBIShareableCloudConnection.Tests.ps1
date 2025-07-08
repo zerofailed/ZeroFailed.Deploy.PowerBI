@@ -30,7 +30,7 @@ Describe "Assert-PBIShareableCloudConnection" {
             $result = Assert-PBIShareableCloudConnection -DisplayName "ExistingConnection" `
                 -ConnectionType "TestType" `
                 -Parameters @{} `
-                -ServicePrincipalClientId "client" `
+                -ServicePrincipalClientId "e795e7b2-a973-436c-a55e-cb06a2fcd68e" `
                 -ServicePrincipalSecret (ConvertTo-SecureString "secret" -AsPlainText -Force) `
                 -TenantId "tenant" `
                 -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)
@@ -62,7 +62,7 @@ Describe "Assert-PBIShareableCloudConnection" {
             $result = Assert-PBIShareableCloudConnection -DisplayName "NewConnection" `
                 -ConnectionType "NewType" `
                 -Parameters @{} `
-                -ServicePrincipalClientId "client" `
+                -ServicePrincipalClientId "e795e7b2-a973-436c-a55e-cb06a2fcd68e" `
                 -ServicePrincipalSecret (ConvertTo-SecureString "secret" -AsPlainText -Force) `
                 -TenantId "tenant" `
                 -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)
