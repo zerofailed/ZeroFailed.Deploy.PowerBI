@@ -30,7 +30,7 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
 
             # Manage permissions if specified
             if ($connection.permissions) {
-                Write-Information "Managing permissions for connection: $($connection.displayName)"
+                Write-Build white "Managing permissions for connection: $($connection.displayName)"
                 
                 try {
                     $permissionResult = Assert-PBICloudConnectionPermissionGroups `
@@ -41,11 +41,11 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
                         -StrictMode
 
                     if ($permissionResult.Success) {
-                        Write-Information "Successfully synchronized permissions for connection: $($connection.displayName)"
-                        Write-Information "  - Identities resolved: $($permissionResult.Summary.TotalIdentitiesResolved)"
-                        Write-Information "  - Permissions added: $($permissionResult.Summary.PermissionsAdded)"
-                        Write-Information "  - Permissions updated: $($permissionResult.Summary.PermissionsUpdated)"
-                        Write-Information "  - Permissions removed: $($permissionResult.Summary.PermissionsRemoved)"
+                        Write-Build white "Successfully synchronized permissions for connection: $($connection.displayName)"
+                        Write-Build white "  - Identities resolved: $($permissionResult.Summary.TotalIdentitiesResolved)"
+                        Write-Build white "  - Permissions added: $($permissionResult.Summary.PermissionsAdded)"
+                        Write-Build white "  - Permissions updated: $($permissionResult.Summary.PermissionsUpdated)"
+                        Write-Build white "  - Permissions removed: $($permissionResult.Summary.PermissionsRemoved)"
                     } else {
                         Write-Warning "Permission synchronization completed with errors for connection: $($connection.displayName)"
                         foreach ($error in $permissionResult.Errors) {
@@ -53,11 +53,10 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
                         }
                     }
                 } catch {
-                    Write-Error "Failed to manage permissions for connection $($connection.displayName): $($_.Exception.Message)"
-                    throw
+                    throw "Failed to manage permissions for connection $($connection.displayName): $($_.Exception.Message)"     
                 }
             } else {
-                Write-Information "No permissions specified for connection: $($connection.displayName)"
+                Write-Build white "No permissions specified for connection: $($connection.displayName)"
             }
         }
     }

@@ -44,7 +44,7 @@ function Resolve-PrincipalIdentities
         [securestring] $GraphAccessToken,
         
         [Parameter()]
-        [switch] $UseCache = $true
+        [switch] $UseCache
     )
 
     # Initialize cache if not exists

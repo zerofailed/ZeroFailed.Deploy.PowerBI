@@ -82,13 +82,13 @@ function Assert-PBICloudConnectionPermissionGroups
         [securestring] $GraphAccessToken,
         
         [Parameter()]
-        [switch] $StrictMode = $true,
+        [switch] $StrictMode,
         
         [Parameter()]
-        [switch] $DryRun = $false,
+        [switch] $DryRun,
         
         [Parameter()]
-        [switch] $ContinueOnError = $true
+        [switch] $ContinueOnError
     )
 
     Write-Information "Starting permission group synchronization for cloud connection: $CloudConnectionId"
@@ -156,8 +156,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to convert permission groups: $($_.Exception.Message)"
             $result.Errors += $errorMessage
-            Write-Error $errorMessage
-            throw
+            throw $errorMessage         
         }
 
         # Step 4: Get current permissions from the cloud connection
@@ -173,8 +172,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to retrieve current permissions: $($_.Exception.Message)"
             $result.Errors += $errorMessage
-            Write-Error $errorMessage
-            throw
+            throw $errorMessage            
         }
 
         # Step 5: Calculate permission delta
@@ -192,8 +190,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to calculate permission delta: $($_.Exception.Message)"
             $result.Errors += $errorMessage
-            Write-Error $errorMessage
-            throw
+            throw $errorMessage         
         }
 
         # Step 6: Apply permission changes
@@ -256,8 +253,7 @@ function Assert-PBICloudConnectionPermissionGroups
     } catch {
         $result.Success = $false
         $result.Errors += "Operation failed: $($_.Exception.Message)"
-        Write-Error "Permission group synchronization failed: $($_.Exception.Message)"
-        throw
+        throw "Permission group synchronization failed: $($_.Exception.Message)"     
     }
 
     return $result

@@ -134,7 +134,7 @@ function Remove-PBICloudConnectionPermissionBatch
         [securestring] $AccessToken,
         
         [Parameter()]
-        [switch] $ContinueOnError = $true
+        [switch] $ContinueOnError
     )
 
     Write-Information "Removing $($RoleAssignments.Count) role assignments from cloud connection $CloudConnectionId"
@@ -145,33 +145,33 @@ function Remove-PBICloudConnectionPermissionBatch
 
     foreach ($assignment in $RoleAssignments) {
         try {
-            if (-not $assignment.id) {
+            if (-not $assignment.currentId) {
                 Write-Warning "Role assignment missing ID property, skipping: $($assignment | ConvertTo-Json -Compress)"
                 $failureCount++
                 continue
             }
 
             $principalInfo = if ($assignment.principalId) { " (Principal: $($assignment.principalId))" } else { "" }
-            Write-Verbose "Removing role assignment $($assignment.id)$principalInfo"
+            Write-Verbose "Removing role assignment $($assignment.currentId)$principalInfo"
 
             $result = Remove-PBICloudConnectionPermission `
                 -CloudConnectionId $CloudConnectionId `
-                -RoleAssignmentId $assignment.id `
+                -RoleAssignmentId $assignment.currentId `
                 -AccessToken $AccessToken
 
             $successCount++
-            Write-Verbose "Successfully removed role assignment $($assignment.id)"
+            Write-Verbose "Successfully removed role assignment $($assignment.currentId)"
 
         } catch {
             $failureCount++
             $failure = @{
-                RoleAssignmentId = $assignment.id
+                RoleAssignmentId = $assignment.currentId
                 PrincipalId = $assignment.principalId
                 Error = $_.Exception.Message
             }
             $failures += $failure
             
-            Write-Error "Failed to remove role assignment $($assignment.id): $($_.Exception.Message)"
+            Write-Error "Failed to remove role assignment $($assignment.currentId): $($_.Exception.Message)"
             
             if (-not $ContinueOnError) {
                 Write-Error "Stopping batch removal due to error and ContinueOnError is false"

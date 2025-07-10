@@ -60,7 +60,7 @@ function Get-PermissionDelta
         [object[]] $DesiredPermissions,
         
         [Parameter()]
-        [switch] $StrictMode = $true
+        [switch] $StrictMode
     )
 
     Write-Verbose "Calculating permission delta for $($CurrentPermissions.Count) current and $($DesiredPermissions.Count) desired permissions"
