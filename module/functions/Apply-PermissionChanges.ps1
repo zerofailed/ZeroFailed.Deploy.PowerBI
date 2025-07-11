@@ -1,0 +1,102 @@
+function Apply-PermissionChanges
+{
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true)]
+        [string] $CloudConnectionId,
+        
+        [Parameter(Mandatory=$true)]
+        [hashtable] $Delta,
+        
+        [Parameter(Mandatory=$true)]
+        [securestring] $AccessToken,
+        
+        [Parameter()]
+        [switch] $ContinueOnError
+    )
+
+    $changeResults = @{
+        Success = $true
+        AddResults = @{ SuccessCount = 0; FailureCount = 0; Failures = @() }
+        UpdateResults = @{ SuccessCount = 0; FailureCount = 0; Failures = @() }
+        RemoveResults = @{ SuccessCount = 0; FailureCount = 0; Failures = @() }
+    }
+
+    # Apply additions
+    if ($Delta.ToAdd.Count -gt 0) {
+        Write-Information "Adding $($Delta.ToAdd.Count) new permissions"
+        foreach ($add in $Delta.ToAdd) {
+            try {
+                Assert-PBICloudConnectionPermissions `
+                    -CloudConnectionId $CloudConnectionId `
+                    -AssigneePrincipalId $add.principalId `
+                    -AssigneePrincipalRole $add.role `
+                    -AssigneePrincipalType $add.principalType `
+                    -AccessToken $AccessToken
+                
+                $changeResults.AddResults.SuccessCount++
+                Write-Verbose "Successfully added permission for principal $($add.principalId) with role $($add.role)"
+            } catch {
+                $changeResults.AddResults.FailureCount++
+                $changeResults.AddResults.Failures += @{
+                    PrincipalId = $add.principalId
+                    Role = $add.role
+                    Error = $_.Exception.Message
+                }
+                Write-Error "Failed to add permission for principal $($add.principalId): $($_.Exception.Message)"
+                
+                if (-not $ContinueOnError) {
+                    throw
+                }
+            }
+        }
+    }
+
+    # Apply updates
+    if ($Delta.ToUpdate.Count -gt 0) {
+        Write-Information "Updating $($Delta.ToUpdate.Count) existing permissions"
+        foreach ($update in $Delta.ToUpdate) {
+            try {
+                Assert-PBICloudConnectionPermissions `
+                    -CloudConnectionId $CloudConnectionId `
+                    -AssigneePrincipalId $update.principalId `
+                    -AssigneePrincipalRole $update.newRole `
+                    -AssigneePrincipalType $update.principalType `
+                    -AccessToken $AccessToken
+                
+                $changeResults.UpdateResults.SuccessCount++
+                Write-Verbose "Successfully updated permission for principal $($update.principalId) from $($update.currentRole) to $($update.newRole)"
+            } catch {
+                $changeResults.UpdateResults.FailureCount++
+                $changeResults.UpdateResults.Failures += @{
+                    PrincipalId = $update.principalId
+                    CurrentRole = $update.currentRole
+                    NewRole = $update.newRole
+                    Error = $_.Exception.Message
+                }
+                Write-Error "Failed to update permission for principal $($update.principalId): $($_.Exception.Message)"
+                
+                if (-not $ContinueOnError) {
+                    throw
+                }
+            }
+        }
+    }
+
+    # Apply removals
+    if ($Delta.ToRemove.Count -gt 0) {
+        Write-Information "Removing $($Delta.ToRemove.Count) unauthorized permissions"
+        $removeResult = Remove-PBICloudConnectionPermissionBatch `
+            -CloudConnectionId $CloudConnectionId `
+            -RoleAssignments $Delta.ToRemove `
+            -AccessToken $AccessToken `
+            -ContinueOnError:$ContinueOnError
+        
+        $changeResults.RemoveResults = $removeResult
+    }
+
+    $totalFailures = $changeResults.AddResults.FailureCount + $changeResults.UpdateResults.FailureCount + $changeResults.RemoveResults.FailureCount
+    $changeResults.Success = ($totalFailures -eq 0) -or $ContinueOnError
+
+    return $changeResults
+}

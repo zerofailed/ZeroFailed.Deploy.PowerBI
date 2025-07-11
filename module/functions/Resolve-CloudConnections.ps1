@@ -1,59 +1,8 @@
 # PowerShell module for processing cloud connection configurations
 using namespace System.Collections.Generic
 
-function Get-YamlContent {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [string]$Path
-    )
 
-    if (-not (Test-Path $Path)) {
-        throw "File not found: $Path"
-    }
 
-    try {
-        $content = Get-Content -Path $Path -Raw
-        $yaml = ConvertFrom-Yaml $content
-        return $yaml
-    }
-    catch {
-        throw "Error processing YAML file '$Path': $_"
-    }
-}
-
-function Resolve-ServicePrincipal {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [hashtable]$ServicePrincipals,
-        
-        [Parameter(Mandatory)]
-        [string]$Reference
-    )
-
-    if ($ServicePrincipals.ContainsKey($Reference)) {
-        return $ServicePrincipals[$Reference]
-    }
-    throw "Service Principal reference '$Reference' not found"
-}
-
-function Resolve-ConnectionTarget {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [hashtable]$ConnectionTargets,
-        
-        [Parameter(Mandatory)]
-        [string]$Reference
-    )
-
-    $type, $env = $Reference -split '\.'
-    if ($ConnectionTargets.ContainsKey($type) -and $ConnectionTargets[$type].ContainsKey($env)) {
-        return $ConnectionTargets[$type][$env]
-    }
-    throw "Connection Target reference '$Reference' not found"
-}
 
 function Resolve-CloudConnections {
     [CmdletBinding()]
@@ -126,25 +75,5 @@ function Resolve-CloudConnections {
     }
     catch {
         throw "Error processing cloud connections: $_"
-    }
-}
-
-function Export-CloudConnections {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [string]$ConfigPath,
-        
-        [Parameter()]
-        [string]$OutputPath
-    )
-
-    $connections = Resolve-CloudConnections -ConfigPath $ConfigPath
-
-    if ($OutputPath) {
-        $connections | ConvertTo-Json -Depth 10 | Set-Content -Path $OutputPath
-    }
-    else {
-        return $connections
     }
 }
