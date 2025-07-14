@@ -53,6 +53,7 @@ function _Get-PermissionDelta
     param (
         [Parameter(Mandatory=$true)]
         [AllowEmptyCollection()]
+        [AllowNull()]
         [object[]] $CurrentPermissions,
         
         [Parameter(Mandatory=$true)]

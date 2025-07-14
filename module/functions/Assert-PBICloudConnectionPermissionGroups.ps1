@@ -151,7 +151,7 @@ function Assert-PBICloudConnectionPermissionGroups
         Write-Information "Step 3: Converting permission groups to individual permissions"
         
         try {
-            $desiredPermissions = ConvertFrom-PermissionGroups -PermissionGroups $PermissionGroups -ResolvedIdentities $resolvedIdentities
+            $desiredPermissions = _ConvertFrom-PermissionGroups -PermissionGroups $PermissionGroups -ResolvedIdentities $resolvedIdentities
             Write-Information "Converted to $($desiredPermissions.Count) individual permission assignments"
         } catch {
             $errorMessage = "Failed to convert permission groups: $($_.Exception.Message)"
@@ -179,7 +179,7 @@ function Assert-PBICloudConnectionPermissionGroups
         Write-Information "Step 5: Calculating permission changes needed"
         
         try {
-            $delta = Get-PermissionDelta -CurrentPermissions $currentPermissions -DesiredPermissions $desiredPermissions -StrictMode:$StrictMode
+            $delta = _Get-PermissionDelta -CurrentPermissions $currentPermissions -DesiredPermissions $desiredPermissions -StrictMode:$StrictMode
             $result.Operations.DeltaCalculation.Success = $true
             $result.Operations.DeltaCalculation.Details = $delta
             
@@ -218,7 +218,7 @@ function Assert-PBICloudConnectionPermissionGroups
                 $result.Operations.PermissionChanges.Success = $true
                 $result.Success = $true
             } else {
-                $changeResults = Apply-PermissionChanges -CloudConnectionId $CloudConnectionId -Delta $delta -AccessToken $AccessToken -ContinueOnError:$ContinueOnError
+                $changeResults = _Apply-PermissionChanges -CloudConnectionId $CloudConnectionId -Delta $delta -AccessToken $AccessToken -ContinueOnError:$ContinueOnError
                 
                 $result.Operations.PermissionChanges = $changeResults
                 $result.Summary.PermissionsAdded = $changeResults.AddResults.SuccessCount

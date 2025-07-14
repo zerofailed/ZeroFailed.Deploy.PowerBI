@@ -8,9 +8,12 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
         # Dot source the function files
         . "$PSScriptRoot\Assert-PBICloudConnectionPermissionGroups.ps1"
         . "$PSScriptRoot\Resolve-PrincipalIdentities.ps1"
-        . "$PSScriptRoot\Get-PermissionDelta.ps1"
+        . "$PSScriptRoot\_Get-PermissionDelta.ps1"
         . "$PSScriptRoot\Remove-PBICloudConnectionPermission.ps1"
         . "$PSScriptRoot\Assert-PBICloudConnectionPermissions.ps1"
+        . "$PSScriptRoot\Get-PBICloudConnectionPermissions.ps1"
+        . "$PSScriptRoot\_ConvertFrom-PermissionGroups.ps1"
+        . "$PSScriptRoot\_Apply-PermissionChanges.ps1"
     }
 
     Context "When all operations succeed" {
@@ -27,8 +30,8 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             # Mock identity resolution
             Mock -CommandName Resolve-PrincipalIdentities -MockWith {
                 return @(
-                    @{ originalIdentity = "admin@company.com"; principalId = "admin-id"; principalType = "User" },
-                    @{ originalIdentity = "user@company.com"; principalId = "user-id"; principalType = "User" }
+                    @{ originalIdentity = "admin@company.com"; principalId = "00000000-0000-0000-0000-000000000000"; principalType = "User" },
+                    @{ originalIdentity = "user@company.com"; principalId = "00000000-0000-0000-0000-000000000001"; principalType = "User" }
                 )
             }
 
@@ -76,14 +79,14 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             # Mock identity resolution
             Mock -CommandName Resolve-PrincipalIdentities -MockWith {
                 return @(
-                    @{ originalIdentity = "admin@company.com"; principalId = "admin-id"; principalType = "User" }
+                    @{ originalIdentity = "admin@company.com"; principalId = "00000000-0000-0000-0000-000000000000"; principalType = "User" }
                 )
             }
 
             # Mock current permissions - already has the desired permission
             Mock -CommandName Get-PBICloudConnectionPermissions -MockWith {
                 return @(
-                    @{ id = "existing-1"; principal = @{ id = "admin-id"; type = "User" }; role = "Owner" }
+                    @{ id = "existing-1"; principal = @{ id = "00000000-0000-0000-0000-000000000000"; type = "User" }; role = "Owner" }
                 )
             }
 
@@ -117,20 +120,20 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             # Mock identity resolution
             Mock -CommandName Resolve-PrincipalIdentities -MockWith {
                 return @(
-                    @{ originalIdentity = "admin@company.com"; principalId = "admin-id"; principalType = "User" }
+                    @{ originalIdentity = "admin@company.com"; principalId = "00000000-0000-0000-0000-000000000000"; principalType = "User" }
                 )
             }
 
             # Mock current permissions - has extra unauthorized permission
             Mock -CommandName Get-PBICloudConnectionPermissions -MockWith {
                 return @(
-                    @{ id = "existing-1"; principal = @{ id = "admin-id"; type = "User" }; role = "Owner" },
+                    @{ id = "existing-1"; principal = @{ id = "00000000-0000-0000-0000-000000000000"; type = "User" }; role = "Owner" },
                     @{ id = "existing-2"; principal = @{ id = "unauthorized-id"; type = "User" }; role = "User" }
                 )
             }
 
             # Mock removal
-            Mock -CommandName Remove-PBICloudConnectionPermissionBatch -MockWith {
+            Mock -CommandName _Remove-PBICloudConnectionPermissionBatch -MockWith {
                 return @{
                     TotalRequested = 1
                     SuccessCount = 1
@@ -152,7 +155,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             $result.Success | Should -Be $true
             $result.Summary.PermissionsRemoved | Should -Be 1
             
-            Assert-MockCalled -CommandName Remove-PBICloudConnectionPermissionBatch -Times 1
+            Assert-MockCalled -CommandName _Remove-PBICloudConnectionPermissionBatch -Times 1
         }
     }
 
@@ -169,7 +172,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             # Mock identity resolution
             Mock -CommandName Resolve-PrincipalIdentities -MockWith {
                 return @(
-                    @{ originalIdentity = "admin@company.com"; principalId = "admin-id"; principalType = "User" }
+                    @{ originalIdentity = "admin@company.com"; principalId = "00000000-0000-0000-0000-000000000000"; principalType = "User" }
                 )
             }
 
@@ -180,7 +183,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
 
             # Mock permission operations (should not be called in dry run)
             Mock -CommandName Assert-PBICloudConnectionPermissions
-            Mock -CommandName Remove-PBICloudConnectionPermissionBatch
+            Mock -CommandName _Remove-PBICloudConnectionPermissionBatch
 
             # Act
             $result = Assert-PBICloudConnectionPermissionGroups `
@@ -195,7 +198,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             
             # Should not make actual changes
             Assert-MockCalled -CommandName Assert-PBICloudConnectionPermissions -Times 0
-            Assert-MockCalled -CommandName Remove-PBICloudConnectionPermissionBatch -Times 0
+            Assert-MockCalled -CommandName _Remove-PBICloudConnectionPermissionBatch -Times 0
         }
     }
 
@@ -213,6 +216,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             Mock -CommandName Resolve-PrincipalIdentities -MockWith {
                 throw "Graph API error"
             }
+            Mock -CommandName Get-PBICloudConnectionPermissions -MockWith {}
 
             # Act & Assert
             { Assert-PBICloudConnectionPermissionGroups `
@@ -222,7 +226,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
                 -GraphAccessToken $graphToken } | Should -Throw
 
             # Should not proceed to other operations
-            Assert-MockCalled -CommandName Get-PBICloudConnectionPermissions -Times 0
+            Should -Invoke -CommandName Get-PBICloudConnectionPermissions -Times 0
         }
     }
 
@@ -239,7 +243,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             # Mock identity resolution
             Mock -CommandName Resolve-PrincipalIdentities -MockWith {
                 return @(
-                    @{ originalIdentity = "admin@company.com"; principalId = "admin-id"; principalType = "User" }
+                    @{ originalIdentity = "admin@company.com"; principalId = "00000000-0000-0000-0000-000000000000"; principalType = "User" }
                 )
             }
 
@@ -271,8 +275,8 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             # Mock identity resolution
             Mock -CommandName Resolve-PrincipalIdentities -MockWith {
                 return @(
-                    @{ originalIdentity = "admin@company.com"; principalId = "admin-id"; principalType = "User" },
-                    @{ originalIdentity = "user@company.com"; principalId = "user-id"; principalType = "User" }
+                    @{ originalIdentity = "admin@company.com"; principalId = "00000000-0000-0000-0000-000000000000"; principalType = "User" },
+                    @{ originalIdentity = "user@company.com"; principalId = "00000000-0000-0000-0000-000000000001"; principalType = "User" }
                 )
             }
 
@@ -283,8 +287,8 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
 
             # Mock permission assertions - one succeeds, one fails
             Mock -CommandName Assert-PBICloudConnectionPermissions -MockWith {
-                if ($AssigneePrincipalId -eq "user-id") {
-                    throw "Permission assignment failed for user-id"
+                if ($AssigneePrincipalId -eq "00000000-0000-0000-0000-000000000001") {
+                    throw "Permission assignment failed for 00000000-0000-0000-0000-000000000001"
                 }
                 return "Success"
             }
@@ -301,7 +305,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             $result.Success | Should -Be $true # Success because ContinueOnError is true
             $result.Summary.PermissionsAdded | Should -Be 1 # Only one succeeded
             $result.Errors | Should -HaveCount 1 # One error reported
-            $result.Errors[0] | Should -BeLike "*Permission assignment failed for user-id*"
+            $result.Errors[0] | Should -BeLike "*Permission assignment failed for 00000000-0000-0000-0000-000000000001*"
         }
     }
 
@@ -312,7 +316,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             $permissionGroups = @{
                 owners = @(
                     "admin@company.com",
-                    @{ principalId = "sp-id"; principalType = "ServicePrincipal" }
+                    @{ principalId = "00000000-0000-0000-0000-000000000002"; principalType = "ServicePrincipal" }
                 )
             }
             $fabricToken = ConvertTo-SecureString "fabric-token" -AsPlainText -Force
@@ -321,8 +325,8 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             # Mock identity resolution
             Mock -CommandName Resolve-PrincipalIdentities -MockWith {
                 return @(
-                    @{ originalIdentity = "admin@company.com"; principalId = "admin-id"; principalType = "User" },
-                    @{ originalIdentity = @{ principalId = "sp-id"; principalType = "ServicePrincipal" }; principalId = "sp-id"; principalType = "ServicePrincipal" }
+                    @{ originalIdentity = "admin@company.com"; principalId = "00000000-0000-0000-0000-000000000000"; principalType = "User" },
+                    @{ originalIdentity = @{ principalId = "00000000-0000-0000-0000-000000000002"; principalType = "ServicePrincipal" }; principalId = "00000000-0000-0000-0000-000000000002"; principalType = "ServicePrincipal" }
                 )
             }
 
@@ -350,10 +354,10 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
 
             # Verify both types were processed
             Assert-MockCalled -CommandName Assert-PBICloudConnectionPermissions -ParameterFilter { 
-                $AssigneePrincipalId -eq "admin-id" -and $AssigneePrincipalType -eq "User" 
+                $AssigneePrincipalId -eq "00000000-0000-0000-0000-000000000000" -and $AssigneePrincipalType -eq "User" 
             } -Times 1
             Assert-MockCalled -CommandName Assert-PBICloudConnectionPermissions -ParameterFilter { 
-                $AssigneePrincipalId -eq "sp-id" -and $AssigneePrincipalType -eq "ServicePrincipal" 
+                $AssigneePrincipalId -eq "00000000-0000-0000-0000-000000000002" -and $AssigneePrincipalType -eq "ServicePrincipal" 
             } -Times 1
         }
     }
