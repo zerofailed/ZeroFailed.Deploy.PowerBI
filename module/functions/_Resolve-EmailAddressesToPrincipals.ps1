@@ -1,4 +1,4 @@
-function Resolve-EmailAddressesToPrincipals
+function _Resolve-EmailAddressesToPrincipals
 {
     [CmdletBinding()]
     param (

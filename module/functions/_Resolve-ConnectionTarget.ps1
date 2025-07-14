@@ -1,4 +1,4 @@
-function Resolve-ConnectionTarget {
+function _Resolve-ConnectionTarget {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]

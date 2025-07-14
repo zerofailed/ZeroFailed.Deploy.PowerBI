@@ -1,4 +1,4 @@
-# <copyright file="Get-PermissionDelta.ps1" company="Endjin Limited">
+# <copyright file="_Get-PermissionDelta.ps1" company="Endjin Limited">
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
@@ -44,10 +44,10 @@ $desired = @(
     @{ principalId = "user3"; principalType = "User"; role = "User" }
 )
 
-$delta = Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
+$delta = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
 #>
 
-function Get-PermissionDelta
+function _Get-PermissionDelta
 {
     [CmdletBinding()]
     param (

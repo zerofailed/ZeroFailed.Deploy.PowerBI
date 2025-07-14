@@ -1,4 +1,4 @@
-function Resolve-ServicePrincipal {
+function _Resolve-ServicePrincipal {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]

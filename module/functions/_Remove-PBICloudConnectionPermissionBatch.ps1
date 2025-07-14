@@ -1,4 +1,4 @@
-function Remove-PBICloudConnectionPermissionBatch
+function _Remove-PBICloudConnectionPermissionBatch
 {
     [CmdletBinding(SupportsShouldProcess)]
     param (

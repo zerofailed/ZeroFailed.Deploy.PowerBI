@@ -1,4 +1,4 @@
-function ConvertFrom-PermissionGroups
+function _ConvertFrom-PermissionGroups
 {
     [CmdletBinding()]
     param (

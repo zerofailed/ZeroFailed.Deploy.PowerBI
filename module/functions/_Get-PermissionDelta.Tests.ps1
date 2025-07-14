@@ -1,12 +1,12 @@
-# <copyright file="Get-PermissionDelta.Tests.ps1" company="Endjin Limited">
+# <copyright file="_Get-PermissionDelta.Tests.ps1" company="Endjin Limited">
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
-Describe "Get-PermissionDelta" {
+Describe "_Get-PermissionDelta" {
 
     BeforeAll {
         # Dot source the function files
-        . "$PSScriptRoot\Get-PermissionDelta.ps1"
+        . "$PSScriptRoot\_Get-PermissionDelta.ps1"
     }
 
     Context "When calculating delta with no current permissions" {
@@ -19,7 +19,7 @@ Describe "Get-PermissionDelta" {
             )
 
             # Act
-            $result = Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired
+            $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired
 
             # Assert
             $result.ToAdd | Should -HaveCount 2
@@ -43,7 +43,7 @@ Describe "Get-PermissionDelta" {
             $desired = @()
 
             # Act
-            $result = Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
+            $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
 
             # Assert
             $result.ToAdd | Should -HaveCount 0
@@ -64,7 +64,7 @@ Describe "Get-PermissionDelta" {
             $desired = @()
 
             # Act
-            $result = Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode:$false
+            $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode:$false
 
             # Assert
             $result.ToAdd | Should -HaveCount 0
@@ -86,7 +86,7 @@ Describe "Get-PermissionDelta" {
             )
 
             # Act
-            $result = Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired
+            $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired
 
             # Assert
             $result.ToAdd | Should -HaveCount 0
@@ -113,7 +113,7 @@ Describe "Get-PermissionDelta" {
             )
 
             # Act
-            $result = Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired
+            $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired
 
             # Assert
             $result.ToAdd | Should -HaveCount 0
@@ -138,7 +138,7 @@ Describe "Get-PermissionDelta" {
             )
 
             # Act
-            $result = Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
+            $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
 
             # Assert
             $result.ToAdd | Should -HaveCount 1
@@ -177,7 +177,7 @@ Describe "Get-PermissionDelta" {
             )
 
             # Act
-            $result = Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired
+            $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired
 
             # Assert
             $result.ToAdd | Should -HaveCount 0
@@ -200,7 +200,7 @@ Describe "Get-PermissionDelta" {
             )
 
             # Act & Assert
-            $result = Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode -WarningAction SilentlyContinue
+            $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode -WarningAction SilentlyContinue
             
             # Should still process the change but issue a warning
             $result.ToAdd | Should -HaveCount 1
@@ -209,10 +209,10 @@ Describe "Get-PermissionDelta" {
     }
 }
 
-Describe "ConvertFrom-PermissionGroups" {
+Describe "_ConvertFrom-PermissionGroups" {
 
     BeforeAll {
-        . "$PSScriptRoot\Get-PermissionDelta.ps1"
+        . "$PSScriptRoot\_Get-PermissionDelta.ps1"
     }
 
     Context "When converting permission groups to flat permission list" {
@@ -232,7 +232,7 @@ Describe "ConvertFrom-PermissionGroups" {
             )
 
             # Act
-            $result = ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities
+            $result = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities
 
             # Assert
             $result | Should -HaveCount 4
@@ -266,7 +266,7 @@ Describe "ConvertFrom-PermissionGroups" {
             )
 
             # Act
-            $result = ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities
+            $result = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities
 
             # Assert
             $result | Should -HaveCount 2
@@ -291,7 +291,7 @@ Describe "ConvertFrom-PermissionGroups" {
             )
 
             # Act
-            $result = ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities
+            $result = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities
 
             # Assert
             $result | Should -HaveCount 1
@@ -311,7 +311,7 @@ Describe "ConvertFrom-PermissionGroups" {
             )
 
             # Act & Assert
-            $result = ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities -WarningAction SilentlyContinue
+            $result = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities -WarningAction SilentlyContinue
             
             # Should only process known groups
             $result | Should -HaveCount 1
@@ -330,7 +330,7 @@ Describe "ConvertFrom-PermissionGroups" {
             )
 
             # Act & Assert
-            $result = ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities -WarningAction SilentlyContinue
+            $result = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities -WarningAction SilentlyContinue
             
             # Should only process resolved identities
             $result | Should -HaveCount 1
