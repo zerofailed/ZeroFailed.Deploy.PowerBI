@@ -2,6 +2,11 @@
 BeforeAll {
     . $PSScriptRoot/Resolve-CloudConnections.ps1
     $testDataDir = Join-Path $PSScriptRoot 'test-data'
+
+    # load required internal dependencies
+    . (Join-Path $PSScriptRoot 'Get-YamlContent.ps1')
+    . (Join-Path $PSScriptRoot '_Resolve-ServicePrincipal.ps1')
+    . (Join-Path $PSScriptRoot '_Resolve-ConnectionTarget.ps1')
 }
 
 Describe 'Get-YamlContent' {
@@ -32,7 +37,7 @@ Describe 'Get-YamlContent' {
     }
 }
 
-Describe 'Resolve-ServicePrincipal' {
+Describe '_Resolve-ServicePrincipal' {
     BeforeAll {
         $servicePrincipals = @{
             development = @{
@@ -45,19 +50,19 @@ Describe 'Resolve-ServicePrincipal' {
 
     Context 'When resolving valid references' {
         It 'Should resolve existing service principal' {
-            $result = Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference 'development'
+            $result = _Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference 'development'
             $result.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
         }
     }
 
     Context 'When handling invalid references' {
         It 'Should throw on non-existent reference' {
-            { Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference 'nonexistent' } | Should -Throw
+            { _Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference 'nonexistent' } | Should -Throw
         }
     }
 }
 
-Describe 'Resolve-ConnectionTarget' {
+Describe '_Resolve-ConnectionTarget' {
     BeforeAll {
         $connectionTargets = @{
             blobStorage = @{
@@ -71,7 +76,7 @@ Describe 'Resolve-ConnectionTarget' {
 
     Context 'When resolving valid references' {
         It 'Should resolve existing connection target' {
-            $result = Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference 'blobStorage.dev'
+            $result = _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference 'blobStorage.dev'
             $result.domain | Should -Be 'blob.core.windows.net'
             $result.account | Should -Be 'devstorageaccount'
         }
@@ -79,16 +84,18 @@ Describe 'Resolve-ConnectionTarget' {
 
     Context 'When handling invalid references' {
         It 'Should throw on non-existent reference' {
-            { Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference 'nonexistent.env' } | Should -Throw
+            { _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference 'nonexistent.env' } | Should -Throw
         }
     }
 }
 
 Describe 'Resolve-CloudConnections' {
     Context 'When processing all configuration files' {
-        It 'Should return denormalized connections' {
+        BeforeAll {
             $results = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml"
-            
+        }
+
+        It 'Should return denormalized connections' {
             # Verify number of connections
             $results.Count | Should -Be 6
 

@@ -45,7 +45,7 @@ function Resolve-CloudConnections {
 
                 # Resolve service principal
                 if ($conn.useServicePrincipal) {
-                    $sp = Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference $conn.useServicePrincipal
+                    $sp = _Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference $conn.useServicePrincipal
                     $denormalized.servicePrincipal = $sp
                 }
                 else {
@@ -54,7 +54,7 @@ function Resolve-CloudConnections {
 
                 # Resolve connection target
                 if ($conn.target.useTarget) {
-                    $target = Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference $conn.target.useTarget
+                    $target = _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference $conn.target.useTarget
                     $denormalized.target = $target
                 }
                 else {

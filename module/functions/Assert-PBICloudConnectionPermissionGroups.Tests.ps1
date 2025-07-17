@@ -14,6 +14,9 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
         . "$PSScriptRoot\Get-PBICloudConnectionPermissions.ps1"
         . "$PSScriptRoot\_ConvertFrom-PermissionGroups.ps1"
         . "$PSScriptRoot\_Apply-PermissionChanges.ps1"
+        . "$PSScriptRoot\Remove-PBICloudConnectionPermissionBatch.ps1"
+
+        Mock Write-Error {}
     }
 
     Context "When all operations succeed" {
