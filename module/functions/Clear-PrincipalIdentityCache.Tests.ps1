@@ -5,9 +5,10 @@
 Describe "Clear-PrincipalIdentityCache" {
 
     BeforeAll {
-        . "$PSScriptRoot\Clear-PrincipalIdentityCache.ps1"
-        . "$PSScriptRoot\_Resolve-EmailAddressesToPrincipals.ps1"
-        . "$PSScriptRoot\Resolve-PrincipalIdentities.ps1"
+        # Dot source the function files
+        . $PSScriptRoot/Clear-PrincipalIdentityCache.ps1
+        . $PSScriptRoot/_Resolve-EmailAddressesToPrincipals.ps1
+        . $PSScriptRoot/Resolve-PrincipalIdentities.ps1
     }
 
     It "should clear the cache successfully" {

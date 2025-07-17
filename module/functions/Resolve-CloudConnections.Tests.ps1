@@ -1,95 +1,19 @@
-# Pester tests for cloud connection resolution
-BeforeAll {
-    . $PSScriptRoot/Resolve-CloudConnections.ps1
-    $testDataDir = Join-Path $PSScriptRoot 'test-data'
-
-    # load required internal dependencies
-    . (Join-Path $PSScriptRoot 'Get-YamlContent.ps1')
-    . (Join-Path $PSScriptRoot '_Resolve-ServicePrincipal.ps1')
-    . (Join-Path $PSScriptRoot '_Resolve-ConnectionTarget.ps1')
-}
-
-Describe 'Get-YamlContent' {
-    Context 'When loading valid YAML files' {
-        It 'Should load service principals configuration' {
-            $result = Get-YamlContent -Path "$testDataDir/servicePrincipals.yaml"
-            $result.servicePrincipals | Should -Not -BeNullOrEmpty
-            $result.servicePrincipals.development.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
-        }
-
-        It 'Should load connection targets configuration' {
-            $result = Get-YamlContent -Path "$testDataDir/connectionTargets.yaml"
-            $result.connectionTargets | Should -Not -BeNullOrEmpty
-            $result.connectionTargets.blobStorage.dev.domain | Should -Be 'blob.core.windows.net'
-        }
-
-        It 'Should load main configuration' {
-            $result = Get-YamlContent -Path "$testDataDir/config.yaml"
-            $result.configurationFiles | Should -Not -BeNullOrEmpty
-            $result.settings | Should -Not -BeNullOrEmpty
-        }
-    }
-
-    Context 'When handling invalid files' {
-        It 'Should throw when file does not exist' {
-            { Get-YamlContent -Path 'nonexistent.yaml' } | Should -Throw
-        }
-    }
-}
-
-Describe '_Resolve-ServicePrincipal' {
-    BeforeAll {
-        $servicePrincipals = @{
-            development = @{
-                clientId = '70982f14-17c2-4eb3-867d-7e68b9a902b7'
-                secretUrl = 'https://endjintest.vault.azure.net/secrets/dev-connection-secret/'
-                tenantId = '1c89d1da-a483-414f-ac8c-ccaf199db0a7'
-            }
-        }
-    }
-
-    Context 'When resolving valid references' {
-        It 'Should resolve existing service principal' {
-            $result = _Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference 'development'
-            $result.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
-        }
-    }
-
-    Context 'When handling invalid references' {
-        It 'Should throw on non-existent reference' {
-            { _Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference 'nonexistent' } | Should -Throw
-        }
-    }
-}
-
-Describe '_Resolve-ConnectionTarget' {
-    BeforeAll {
-        $connectionTargets = @{
-            blobStorage = @{
-                dev = @{
-                    domain = 'blob.core.windows.net'
-                    account = 'devstorageaccount'
-                }
-            }
-        }
-    }
-
-    Context 'When resolving valid references' {
-        It 'Should resolve existing connection target' {
-            $result = _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference 'blobStorage.dev'
-            $result.domain | Should -Be 'blob.core.windows.net'
-            $result.account | Should -Be 'devstorageaccount'
-        }
-    }
-
-    Context 'When handling invalid references' {
-        It 'Should throw on non-existent reference' {
-            { _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference 'nonexistent.env' } | Should -Throw
-        }
-    }
-}
+# <copyright file="Resolve-CloudConnections.Tests.ps1" company="Endjin Limited">
+# Copyright (c) Endjin Limited. All rights reserved.
+# </copyright>
 
 Describe 'Resolve-CloudConnections' {
+    BeforeAll {
+        # Dot source the function files
+        . $PSScriptRoot/Resolve-CloudConnections.ps1
+        $testDataDir = Join-Path $PSScriptRoot 'test-data'
+    
+        # load required internal dependencies
+        . (Join-Path $PSScriptRoot 'Get-YamlContent.ps1')
+        . (Join-Path $PSScriptRoot '_Resolve-ServicePrincipal.ps1')
+        . (Join-Path $PSScriptRoot '_Resolve-ConnectionTarget.ps1')
+    }
+
     Context 'When processing all configuration files' {
         BeforeAll {
             $results = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml"

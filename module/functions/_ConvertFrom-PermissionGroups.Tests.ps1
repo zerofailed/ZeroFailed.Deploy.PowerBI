@@ -5,7 +5,8 @@
 Describe "_ConvertFrom-PermissionGroups" {
 
     BeforeAll {
-        . "$PSScriptRoot\_ConvertFrom-PermissionGroups.ps1"
+        # Dot source the function files
+        . $PSScriptRoot/_ConvertFrom-PermissionGroups.ps1
         Mock Write-Warning {}
     }
 
@@ -105,7 +106,7 @@ Describe "_ConvertFrom-PermissionGroups" {
             )
 
             # Act & Assert
-            [array]$result = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities -WarningAction SilentlyContinue
+            [array]$result = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities
             
             # Should only process known groups
             $result | Should -HaveCount 1
@@ -124,7 +125,7 @@ Describe "_ConvertFrom-PermissionGroups" {
             )
 
             # Act & Assert
-            [array]$result = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities -WarningAction SilentlyContinue
+            [array]$result = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities
             
             # Should only process resolved identities
             $result | Should -HaveCount 1

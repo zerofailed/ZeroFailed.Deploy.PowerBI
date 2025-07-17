@@ -6,15 +6,15 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
 
     BeforeAll {
         # Dot source the function files
-        . "$PSScriptRoot\Assert-PBICloudConnectionPermissionGroups.ps1"
-        . "$PSScriptRoot\Resolve-PrincipalIdentities.ps1"
-        . "$PSScriptRoot\_Get-PermissionDelta.ps1"
-        . "$PSScriptRoot\Remove-PBICloudConnectionPermission.ps1"
-        . "$PSScriptRoot\Assert-PBICloudConnectionPermissions.ps1"
-        . "$PSScriptRoot\Get-PBICloudConnectionPermissions.ps1"
-        . "$PSScriptRoot\_ConvertFrom-PermissionGroups.ps1"
-        . "$PSScriptRoot\_Apply-PermissionChanges.ps1"
-        . "$PSScriptRoot\Remove-PBICloudConnectionPermissionBatch.ps1"
+        . $PSScriptRoot/Assert-PBICloudConnectionPermissionGroups.ps1
+        . $PSScriptRoot/Resolve-PrincipalIdentities.ps1
+        . $PSScriptRoot/_Get-PermissionDelta.ps1
+        . $PSScriptRoot/Remove-PBICloudConnectionPermission.ps1
+        . $PSScriptRoot/Assert-PBICloudConnectionPermissions.ps1
+        . $PSScriptRoot/Get-PBICloudConnectionPermissions.ps1
+        . $PSScriptRoot/_ConvertFrom-PermissionGroups.ps1
+        . $PSScriptRoot/_Apply-PermissionChanges.ps1
+        . $PSScriptRoot/Remove-PBICloudConnectionPermissionBatch.ps1
 
         Mock Write-Error {}
         Mock Write-Warning {}

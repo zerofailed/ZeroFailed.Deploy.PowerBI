@@ -3,9 +3,10 @@
 # </copyright>
 
 Describe "Get-PBICloudConnectionPermissions" {
-
+    
     BeforeAll {
-        . "$PSScriptRoot\Get-PBICloudConnectionPermissions.ps1"
+        # Dot source the function files
+        . $PSScriptRoot/Get-PBICloudConnectionPermissions.ps1
     }
 
     Context "When retrieving permissions successfully" {

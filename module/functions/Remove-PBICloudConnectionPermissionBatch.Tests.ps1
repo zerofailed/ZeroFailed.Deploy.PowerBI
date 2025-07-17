@@ -5,8 +5,9 @@
 Describe "Remove-PBICloudConnectionPermissionBatch" {
 
     BeforeAll {
-        . "$PSScriptRoot\Remove-PBICloudConnectionPermissionBatch.ps1"
-        . "$PSScriptRoot\Remove-PBICloudConnectionPermission.ps1"
+        # Dot source the function files
+        . $PSScriptRoot/Remove-PBICloudConnectionPermissionBatch.ps1
+        . $PSScriptRoot/Remove-PBICloudConnectionPermission.ps1
 
         Mock Write-Error {}
         Mock Write-Warning {}
@@ -127,8 +128,7 @@ Describe "Remove-PBICloudConnectionPermissionBatch" {
             $result = Remove-PBICloudConnectionPermissionBatch `
                         -CloudConnectionId $cloudConnectionId `
                         -RoleAssignments $roleAssignments `
-                        -AccessToken $mockToken `
-                        -WarningAction SilentlyContinue
+                        -AccessToken $mockToken
 
             # Assert
             Assert-MockCalled -CommandName Remove-PBICloudConnectionPermission -Times 2 # Should skip the one without ID

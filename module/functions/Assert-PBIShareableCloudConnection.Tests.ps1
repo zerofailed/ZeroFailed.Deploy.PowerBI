@@ -5,10 +5,10 @@
 Describe "Assert-PBIShareableCloudConnection" {
 
     BeforeAll {
-        # Dot source the function file to load Assert-PBIShareableCloudConnection into the test session.
-        . "$PSScriptRoot\Assert-PBIShareableCloudConnection.ps1"
-        . "$PSScriptRoot\_GenerateCreateBody.ps1"
-        . "$PSScriptRoot\_GenerateUpdateBody.ps1"
+        # Dot source the function files
+        . $PSScriptRoot/Assert-PBIShareableCloudConnection.ps1
+        . $PSScriptRoot/_GenerateCreateBody.ps1
+        . $PSScriptRoot/_GenerateUpdateBody.ps1
     }
 
     Context "When an existing connection is found" {

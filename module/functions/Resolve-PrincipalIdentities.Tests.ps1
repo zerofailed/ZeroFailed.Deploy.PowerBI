@@ -6,12 +6,11 @@ Describe "Resolve-PrincipalIdentities" {
 
     BeforeAll {
         # Dot source the function files
-        . "$PSScriptRoot\Resolve-PrincipalIdentities.ps1"
-        . "$PSScriptRoot\Clear-PrincipalIdentityCache.ps1"
-        . "$PSScriptRoot\_Resolve-EmailAddressesToPrincipals.ps1"
+        . $PSScriptRoot/Resolve-PrincipalIdentities.ps1
+        . $PSScriptRoot/Clear-PrincipalIdentityCache.ps1
+        . $PSScriptRoot/_Resolve-EmailAddressesToPrincipals.ps1
         
-        # Clear cache before tests
-        Clear-PrincipalIdentityCache
+        Mock Write-Warning {}
     }
 
     BeforeEach {
@@ -48,7 +47,7 @@ Describe "Resolve-PrincipalIdentities" {
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
             # Act & Assert
-            $result = Resolve-PrincipalIdentities -Identities $identities -GraphAccessToken $mockToken -WarningAction SilentlyContinue
+            $result = Resolve-PrincipalIdentities -Identities $identities -GraphAccessToken $mockToken
             $result | Should -HaveCount 0
         }
     }
@@ -139,7 +138,7 @@ Describe "Resolve-PrincipalIdentities" {
             }
 
             # Act & Assert
-            $result = Resolve-PrincipalIdentities -Identities $identities -GraphAccessToken $mockToken -WarningAction SilentlyContinue
+            $result = Resolve-PrincipalIdentities -Identities $identities -GraphAccessToken $mockToken
             $result | Should -HaveCount 0
         }
     }

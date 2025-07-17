@@ -1,4 +1,4 @@
-# <copyright file="Test-PermissionObjectsValid.ps1" company="Endjin Limited">
+# <copyright file="_Test-PermissionObjectsValid.ps1" company="Endjin Limited">
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
@@ -27,15 +27,15 @@ $validPermissions = @(
     @{ principalId = "id1"; principalType = "User"; role = "Owner" },
     @{ principalId = "id2"; principalType = "Group"; role = "User" }
 )
-Test-PermissionObjectsValid -Permissions $validPermissions -PermissionType "Desired" # Returns True
+_Test-PermissionObjectsValid -Permissions $validPermissions -PermissionType "Desired" # Returns True
 
 $invalidPermissions = @(
     @{ principalId = "id3"; role = "Owner" } # Missing principalType
 )
-Test-PermissionObjectsValid -Permissions $invalidPermissions -PermissionType "Desired" # Returns False
+_Test-PermissionObjectsValid -Permissions $invalidPermissions -PermissionType "Desired" # Returns False
 #>
 
-function Test-PermissionObjectsValid
+function _Test-PermissionObjectsValid
 {
     [CmdletBinding()]
     param (

@@ -6,7 +6,7 @@ Describe "Remove-PBICloudConnectionPermission" {
 
     BeforeAll {
         # Dot source the function file
-        . "$PSScriptRoot\Remove-PBICloudConnectionPermission.ps1"
+        . $PSScriptRoot/Remove-PBICloudConnectionPermission.ps1
 
         Mock Write-Error {}
         Mock Write-Warning {}
@@ -61,8 +61,7 @@ Describe "Remove-PBICloudConnectionPermission" {
             $result = Remove-PBICloudConnectionPermission `
                 -CloudConnectionId $cloudConnectionId `
                 -RoleAssignmentId $roleAssignmentId `
-                -AccessToken $mockToken `
-                -WarningAction SilentlyContinue
+                -AccessToken $mockToken
 
             $result | Should -BeNullOrEmpty
         }

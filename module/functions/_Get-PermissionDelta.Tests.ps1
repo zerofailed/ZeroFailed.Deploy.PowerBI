@@ -6,8 +6,8 @@ Describe "_Get-PermissionDelta" {
 
     BeforeAll {
         # Dot source the function files
-        . "$PSScriptRoot\_Get-PermissionDelta.ps1"
-        . "$PSScriptRoot\Get-PBICloudConnectionPermissions.ps1"
+        . $PSScriptRoot/_Get-PermissionDelta.ps1
+        . $PSScriptRoot/Get-PBICloudConnectionPermissions.ps1
 
         Mock Write-Warning {}
     }
@@ -203,7 +203,7 @@ Describe "_Get-PermissionDelta" {
             )
 
             # Act & Assert
-            $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode -WarningAction SilentlyContinue
+            $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
             
             # Should still process the change but issue a warning
             $result.ToAdd | Should -HaveCount 1

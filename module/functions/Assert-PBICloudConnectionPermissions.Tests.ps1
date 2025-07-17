@@ -5,8 +5,8 @@
 Describe "Assert-PBICloudConnectionPermissions" {
 
     BeforeAll {
-        # Dot source the function file to load Assert-PBICloudConnectionPermissions into the test session.
-        . "$PSScriptRoot\Assert-PBICloudConnectionPermissions.ps1"
+        # Dot source the function files
+        . $PSScriptRoot/Assert-PBICloudConnectionPermissions.ps1
     }
 
     Context "When an existing permission is found" {
