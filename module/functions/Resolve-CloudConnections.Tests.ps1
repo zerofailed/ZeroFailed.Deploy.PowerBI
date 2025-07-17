@@ -113,6 +113,15 @@ Describe 'Resolve-CloudConnections' {
             $customConnection.servicePrincipal.clientId | Should -Be '943a5f46-86eb-4a39-b34f-cb3046dfa30d'
             $customConnection.target.account | Should -Be 'customstorage'
         }
+
+        It "Should apply connection target property overrides specified on the cloud connection definition" {
+            $sqlConnection = $results | Where-Object { $_.displayName -eq 'Development SQL Database' }
+            $sqlConnection | Should -Not -BeNullOrEmpty
+            $sqlConnection.type | Should -Be 'SQL'
+            $sqlConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
+            $sqlConnection.target.server | Should -Be 'devsql.database.windows.net'
+            $sqlConnection.target.database | Should -Be 'overridden'
+        }
     }
 
     Context 'When handling configuration errors' {

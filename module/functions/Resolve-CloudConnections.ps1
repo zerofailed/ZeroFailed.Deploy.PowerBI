@@ -56,6 +56,10 @@ function Resolve-CloudConnections {
                 if ($conn.target.useTarget) {
                     $target = _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference $conn.target.useTarget
                     $denormalized.target = $target
+                    # Override connection target properties (e.g. the database name on a SQL connection)
+                    $conn.target.GetEnumerator() | 
+                        Where-Object { $_.Key -ne 'useTarget' } | 
+                        ForEach-Object { $denormalized.target[$_.Key] = $_.Value }
                 }
                 else {
                     $denormalized.target = $conn.target
