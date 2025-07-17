@@ -17,7 +17,7 @@ cloudConnections:
 
   # Test SQL with a reference to existing connection's service principal
   - displayName: Test SQL Database
-    type: SQLServer
+    type: SQL
     useServicePrincipal: test
     target:
       useTarget: sqlServer.test
