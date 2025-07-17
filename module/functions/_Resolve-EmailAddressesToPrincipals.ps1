@@ -1,3 +1,31 @@
+# <copyright file="_Resolve-EmailAddressesToPrincipals.ps1" company="Endjin Limited">
+# Copyright (c) Endjin Limited. All rights reserved.
+# </copyright>
+
+<#
+.SYNOPSIS
+Resolves a list of email addresses to their corresponding Microsoft Graph principal IDs and types.
+
+.DESCRIPTION
+This function queries the Microsoft Graph API to find the principal (User, Group, or ServicePrincipal)
+associated with each provided email address. It attempts to resolve in a specific order (User, then Group, then ServicePrincipal).
+This is a helper function for identity resolution within the Power BI deployment process.
+
+.PARAMETER EmailAddresses
+An array of email address strings to resolve.
+
+.PARAMETER GraphAccessToken
+Secure string containing the access token for the Microsoft Graph API.
+
+.OUTPUTS
+Returns an array of hashtables, each containing 'emailAddress', 'principalId', and 'principalType' for resolved identities.
+
+.EXAMPLE
+$resolved = _Resolve-EmailAddressesToPrincipals `
+    -EmailAddresses @("user1@company.com", "group@company.com") `
+    -GraphAccessToken $graphToken.Token
+#>
+
 function _Resolve-EmailAddressesToPrincipals
 {
     [CmdletBinding()]

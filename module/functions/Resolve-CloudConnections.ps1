@@ -1,7 +1,31 @@
+# <copyright file="Resolve-CloudConnections.ps1" company="Endjin Limited">
+# Copyright (c) Endjin Limited. All rights reserved.
+# </copyright>
+
+<#
+.SYNOPSIS
+Resolves and denormalizes cloud connection configurations from YAML files.
+
+.DESCRIPTION
+This function reads a main configuration file, along with referenced service principals
+and connection targets, to produce a denormalized list of cloud connection objects.
+It handles the resolution of references and merges global settings into each connection.
+
+.PARAMETER ConfigPath
+The path to the main configuration YAML file (e.g., config.yaml).
+
+.OUTPUTS
+Returns a list of denormalized cloud connection objects, each containing all resolved details.
+
+.EXAMPLE
+$connections = Resolve-CloudConnections -ConfigPath "C:\config\main.yaml"
+foreach ($conn in $connections) {
+    Write-Host "Connection: $($conn.displayName), Type: $($conn.type)"
+}
+#>
+
 # PowerShell module for processing cloud connection configurations
 using namespace System.Collections.Generic
-
-
 
 
 function Resolve-CloudConnections {

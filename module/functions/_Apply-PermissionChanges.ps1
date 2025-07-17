@@ -1,3 +1,40 @@
+# <copyright file="_Apply-PermissionChanges.ps1" company="Endjin Limited">
+# Copyright (c) Endjin Limited. All rights reserved.
+# </copyright>
+
+<#
+.SYNOPSIS
+Applies permission changes (additions, updates, removals) to a Power BI shareable cloud connection.
+
+.DESCRIPTION
+This function orchestrates the application of permission changes to a Power BI shareable cloud connection based on a calculated delta.
+It iterates through additions, updates, and removals, calling the appropriate functions to modify permissions.
+It supports continuing on error for batch operations.
+
+.PARAMETER CloudConnectionId
+The ID of the Power BI shareable cloud connection.
+
+.PARAMETER Delta
+Hashtable containing the permission changes to apply, including 'ToAdd', 'ToUpdate', and 'ToRemove' arrays.
+
+.PARAMETER AccessToken
+Secure string containing the access token for the Power BI Fabric API.
+
+.PARAMETER ContinueOnError
+Switch to continue processing even if some operations fail.
+
+.OUTPUTS
+Returns a hashtable with success and failure counts, plus details of any failures for each operation type (Add, Update, Remove).
+
+.EXAMPLE
+$delta = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
+$result = _Apply-PermissionChanges `
+    -CloudConnectionId "a60de636-56cf-4775-8217-76bb5b33bbb3" `
+    -Delta $delta `
+    -AccessToken $fabricToken.Token `
+    -ContinueOnError
+#>
+
 function _Apply-PermissionChanges
 {
     [CmdletBinding()]

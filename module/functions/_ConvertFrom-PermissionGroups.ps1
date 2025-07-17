@@ -1,3 +1,40 @@
+# <copyright file="_ConvertFrom-PermissionGroups.ps1" company="Endjin Limited">
+# Copyright (c) Endjin Limited. All rights reserved.
+# </copyright>
+
+<#
+.SYNOPSIS
+Converts a hashtable of permission groups into a flat array of individual permission objects.
+
+.DESCRIPTION
+This function takes a structured hashtable of permission groups (e.g., owners, users) and
+transforms it into a flat array of permission objects, each containing a principal ID,
+principal type, and the corresponding Power BI role. It uses a lookup of already resolved
+identities to ensure consistency and efficiency.
+
+.PARAMETER PermissionGroups
+Hashtable containing permission groups with keys like "owners", "users", "reshareUsers".
+Each group contains an array of identities (email addresses or structured objects).
+
+.PARAMETER ResolvedIdentities
+Array of objects representing identities that have already been resolved to principal IDs and types.
+This is used to map the identities in PermissionGroups to their resolved forms.
+
+.OUTPUTS
+Returns an array of permission objects, each with 'principalId', 'principalType', and 'role' properties.
+
+.EXAMPLE
+$permissionGroups = @{
+    owners = @("user1@domain.com")
+    users = @("user2@domain.com")
+}
+$resolvedIdentities = @(
+    @{ originalIdentity = "user1@domain.com"; principalId = "id1"; principalType = "User" },
+    @{ originalIdentity = "user2@domain.com"; principalId = "id2"; principalType = "User" }
+)
+$permissions = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities
+#>
+
 function _ConvertFrom-PermissionGroups
 {
     [CmdletBinding()]
