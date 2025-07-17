@@ -33,12 +33,12 @@ The following diagram illustrates the flow of permission management in the `Asse
     graph TD
         A[Start<br>Function: Assert-PBICloudConnectionPermissionGroups<br/>] --> B[Collect Identities from Permission Groups<br/>Function: Assert-PBICloudConnectionPermissionGroups<br/>]
         B --> C[Resolve Identities to Principal IDs<br/>Function: Resolve-PrincipalIdentities<br/>]
-        C --> D[Convert Permission Groups to Flat List<br/>Function: ConvertFrom-PermissionGroups<br/>]
+        C --> D[Convert Permission Groups to Flat List<br/>Function: _ConvertFrom-PermissionGroups<br/>]
         D --> E[Retrieve Current Permissions<br/>Function: Get-PBICloudConnectionPermissions<br/>]
-        E --> F[Calculate Permission Delta<br/>Function: Get-PermissionDelta<br/>]
+        E --> F[Calculate Permission Delta<br/>Function: _Get-PermissionDelta<br/>]
         F --> G{Delta Changes?}
         G -->|No| H[No Changes Needed]
-        G -->|Yes| I[Apply Permission Changes<br/>Function: Apply-PermissionChanges<br/>]
+        G -->|Yes| I[Apply Permission Changes<br/>Function: _Apply-PermissionChanges<br/>]
         I --> L[Update or Create Permissions<br/>Function: Assert-PBICloudConnectionPermissions<br/>]
         L --> M[Remove Permissions<br/>Function: Remove-PBICloudConnectionPermissionBatch<br/>]
         M --> J[Retrieve Final State<br/>Function: Get-PBICloudConnectionPermissions<br/>]
@@ -55,14 +55,12 @@ graph TD
     A[Resolve Configuration] --> B[Retrieve Existing Permissions]
     B --> C[Ensure Role Assignments]
     C --> D[Remove Unnecessary Permissions]
-    D --> E[Export Cloud Connections]
 
     subgraph Functions
         A[Resolve-CloudConnections]
         B[Get-PBICloudConnectionPermissions]
         C[Assert-PBICloudConnectionPermissions]
         D[Remove-PBICloudConnectionPermission]
-        E[Export-CloudConnections]
     end
 ```
 
