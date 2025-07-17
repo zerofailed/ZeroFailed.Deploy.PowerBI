@@ -43,10 +43,10 @@ function _Apply-PermissionChanges
                     Role = $add.role
                     Error = $_.Exception.Message
                 }
-                Write-Error "Failed to add permission for principal $($add.principalId): $($_.Exception.Message)"
                 
+                Write-Error "Failed to add permission for principal $($add.principalId): $($_.Exception.Message)" -ErrorAction Continue
                 if (-not $ContinueOnError) {
-                    throw
+                    throw "Stopping 'apply additions' due to error and ContinueOnError is false"
                 }
             }
         }
@@ -74,10 +74,10 @@ function _Apply-PermissionChanges
                     NewRole = $update.newRole
                     Error = $_.Exception.Message
                 }
-                Write-Error "Failed to update permission for principal $($update.principalId): $($_.Exception.Message)"
+                Write-Error "Failed to update permission for principal $($update.principalId): $($_.Exception.Message)" -ErrorAction Continue
                 
                 if (-not $ContinueOnError) {
-                    throw
+                    throw "Stopping 'apply updates' due to error and ContinueOnError is false"
                 }
             }
         }

@@ -91,11 +91,10 @@ function Remove-PBICloudConnectionPermissionBatch
             }
             $failures += $failure
             
-            Write-Error "Failed to remove role assignment $($assignment.id): $($_.Exception.Message)"
+            Write-Error "Failed to remove role assignment $($assignment.id): $($_.Exception.Message)" -ErrorAction Continue
             
             if (-not $ContinueOnError) {
                 throw "Stopping batch removal due to error and ContinueOnError is false"
-                break
             }
         }
     }
