@@ -38,7 +38,10 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
                         -PermissionGroups $connection.permissions `
                         -AccessToken $token.Token `
                         -GraphAccessToken $graphToken.Token `
-                        -StrictMode
+                        -StrictMode `
+                        -DryRun:$PowerBiDryRunMode `
+                        -ContinueOnError:$PowerBiContinueOnError
+
 
                     if ($permissionResult.Success) {
                         Write-Build white "Successfully synchronized permissions for connection: $($connection.displayName)"
@@ -48,8 +51,8 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
                         Write-Build white "  - Permissions removed: $($permissionResult.Summary.PermissionsRemoved)"
                     } else {
                         Write-Warning "Permission synchronization completed with errors for connection: $($connection.displayName)"
-                        foreach ($error in $permissionResult.Errors) {
-                            Write-Warning "  - $error"
+                        foreach ($permissionError in $permissionResult.Errors) {
+                            Write-Warning "  - $permissionError"
                         }
                     }
                 } catch {
