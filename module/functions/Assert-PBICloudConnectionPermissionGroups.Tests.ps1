@@ -133,7 +133,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             }
 
             # Mock removal
-            Mock -CommandName _Remove-PBICloudConnectionPermissionBatch -MockWith {
+            Mock -CommandName Remove-PBICloudConnectionPermissionBatch -MockWith {
                 return @{
                     TotalRequested = 1
                     SuccessCount = 1
@@ -155,7 +155,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             $result.Success | Should -Be $true
             $result.Summary.PermissionsRemoved | Should -Be 1
             
-            Assert-MockCalled -CommandName _Remove-PBICloudConnectionPermissionBatch -Times 1
+            Assert-MockCalled -CommandName Remove-PBICloudConnectionPermissionBatch -Times 1
         }
     }
 
@@ -183,7 +183,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
 
             # Mock permission operations (should not be called in dry run)
             Mock -CommandName Assert-PBICloudConnectionPermissions
-            Mock -CommandName _Remove-PBICloudConnectionPermissionBatch
+            Mock -CommandName Remove-PBICloudConnectionPermissionBatch
 
             # Act
             $result = Assert-PBICloudConnectionPermissionGroups `
@@ -198,7 +198,7 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
             
             # Should not make actual changes
             Assert-MockCalled -CommandName Assert-PBICloudConnectionPermissions -Times 0
-            Assert-MockCalled -CommandName _Remove-PBICloudConnectionPermissionBatch -Times 0
+            Assert-MockCalled -CommandName Remove-PBICloudConnectionPermissionBatch -Times 0
         }
     }
 

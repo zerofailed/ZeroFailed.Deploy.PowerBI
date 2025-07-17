@@ -86,7 +86,7 @@ function _Apply-PermissionChanges
     # Apply removals
     if ($Delta.ToRemove.Count -gt 0) {
         Write-Information "Removing $($Delta.ToRemove.Count) unauthorized permissions"
-        $removeResult = _Remove-PBICloudConnectionPermissionBatch `
+        $removeResult = Remove-PBICloudConnectionPermissionBatch `
             -CloudConnectionId $CloudConnectionId `
             -RoleAssignments $Delta.ToRemove `
             -AccessToken $AccessToken `

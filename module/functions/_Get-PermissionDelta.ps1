@@ -105,7 +105,7 @@ function _Get-PermissionDelta
             if ($current.role -ne $desired.role) {
                 Write-Verbose "Permission update needed: Principal $desiredKey role change from $($current.role) to $($desired.role)"
                 $toUpdate += @{
-                    currentId = $current.id
+                    id = $current.id
                     principalId = $desired.principalId
                     principalType = $desired.principalType
                     currentRole = $current.role
@@ -134,7 +134,7 @@ function _Get-PermissionDelta
                 $current = $currentLookup[$currentKey]
                 Write-Verbose "Permission removal needed: Principal $currentKey with role $($current.role) not in desired state"
                 $toRemove += @{
-                    currentId = $current.id
+                    id = $current.id
                     principalId = $current.principal.id
                     principalType = $current.principal.type
                     role = $current.role

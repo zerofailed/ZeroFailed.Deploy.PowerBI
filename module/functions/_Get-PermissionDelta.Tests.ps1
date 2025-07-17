@@ -51,9 +51,9 @@ Describe "_Get-PermissionDelta" {
             $result.ToRemove | Should -HaveCount 2
             
             $result.ToRemove[0].principalId | Should -Be "user1"
-            $result.ToRemove[0].currentId | Should -Be "1"
+            $result.ToRemove[0].id | Should -Be "1"
             $result.ToRemove[1].principalId | Should -Be "user2"
-            $result.ToRemove[1].currentId | Should -Be "2"
+            $result.ToRemove[1].id | Should -Be "2"
         }
 
         It "should not mark permissions for removal when strict mode is disabled" {
@@ -96,7 +96,7 @@ Describe "_Get-PermissionDelta" {
             $result.ToUpdate[0].principalId | Should -Be "user1"
             $result.ToUpdate[0].currentRole | Should -Be "User"
             $result.ToUpdate[0].newRole | Should -Be "Owner"
-            $result.ToUpdate[0].currentId | Should -Be "1"
+            $result.ToUpdate[0].id | Should -Be "1"
         }
     }
 
@@ -156,7 +156,7 @@ Describe "_Get-PermissionDelta" {
             
             # Check removal
             $result.ToRemove[0].principalId | Should -Be "user2"
-            $result.ToRemove[0].currentId | Should -Be "2"
+            $result.ToRemove[0].id | Should -Be "2"
             
             # Check summary
             $result.Summary.TotalChanges | Should -Be 3
