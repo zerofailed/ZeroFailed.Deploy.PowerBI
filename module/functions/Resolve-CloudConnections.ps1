@@ -76,6 +76,12 @@ function Resolve-CloudConnections {
                     $denormalized.servicePrincipal = $conn.servicePrincipal
                 }
 
+                # Apply the default tenant ID if one hasn't been specified
+                if (!$denormalized.servicePrincipal.ContainsKey('tenantId') -or [string]::IsNullOrEmpty($denormalized.servicePrincipal['tenantId'])) {
+                    Write-Verbose "Applying default tenant ID to service principal: $($denormalized.servicePrincipal)"
+                    $denormalized.servicePrincipal['tenantId'] = $config.settings.defaultTenantId
+                }
+
                 # Resolve connection target
                 if ($conn.target.useTarget) {
                     $target = _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference $conn.target.useTarget

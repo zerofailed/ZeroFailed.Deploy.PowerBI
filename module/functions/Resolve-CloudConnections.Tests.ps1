@@ -43,8 +43,16 @@ Describe 'Resolve-CloudConnections' {
             $sqlConnection | Should -Not -BeNullOrEmpty
             $sqlConnection.type | Should -Be 'SQL'
             $sqlConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
+            $sqlConnection.servicePrincipal.tenantId | Should -Be '00000000-0000-0000-0000-000000000001'
             $sqlConnection.target.server | Should -Be 'devsql.database.windows.net'
             $sqlConnection.target.database | Should -Be 'overridden'
+        }
+
+        It "Should apply the default tenant ID when a service principal does not define its own" {
+            $sqlConnection = $results | Where-Object { $_.displayName -eq 'Test SQL Database' }
+            $sqlConnection | Should -Not -BeNullOrEmpty
+            $sqlConnection.type | Should -Be 'SQL'
+            $sqlConnection.servicePrincipal.tenantId | Should -Be '00000000-0000-0000-0000-000000000000'
         }
     }
 

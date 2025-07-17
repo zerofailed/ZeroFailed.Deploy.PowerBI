@@ -14,9 +14,9 @@ configurationFiles:
 
 # Global settings
 settings:
-  vaultBaseUrl: https://endjintest.vault.azure.net/secrets
-  defaultOwner: jessica.hill@endjin.com
-  defaultTenantId: 1c89d1da-a483-414f-ac8c-ccaf199db0a7
+  # vaultBaseUrl: https://endjintest.vault.azure.net/secrets
+  # defaultOwner: jessica.hill@endjin.com
+  defaultTenantId: 00000000-0000-0000-0000-000000000000
 
 # Note: You can add more connection group files by adding them to the connections list above.
 # This allows for flexible organization of connections based on:
