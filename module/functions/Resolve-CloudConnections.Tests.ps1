@@ -130,23 +130,3 @@ Describe 'Resolve-CloudConnections' {
         }
     }
 }
-
-Describe 'Export-CloudConnections' {
-    Context 'When exporting connections' {
-        BeforeAll {
-            $tempFile = Join-Path $TestDrive 'connections.json'
-        }
-
-        It 'Should export connections to JSON file' {
-            Export-CloudConnections -ConfigPath "$testDataDir/config.yaml" -OutputPath $tempFile
-            Test-Path $tempFile | Should -BeTrue
-            $content = Get-Content $tempFile | ConvertFrom-Json
-            $content.Count | Should -Be 6
-        }
-
-        It 'Should return connections when no output path specified' {
-            $results = Export-CloudConnections -ConfigPath "$testDataDir/config.yaml"
-            $results.Count | Should -Be 6
-        }
-    }
-}

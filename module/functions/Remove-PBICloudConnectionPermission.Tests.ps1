@@ -9,6 +9,7 @@ Describe "Remove-PBICloudConnectionPermission" {
         . "$PSScriptRoot\Remove-PBICloudConnectionPermission.ps1"
 
         Mock Write-Error {}
+        Mock Write-Warning {}
     }
 
     Context "When removing a permission successfully" {
