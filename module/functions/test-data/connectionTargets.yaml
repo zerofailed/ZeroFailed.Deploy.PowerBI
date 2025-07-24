@@ -4,16 +4,32 @@ version: '1.0'
 connectionTargets:
   blobStorage:
     dev:
-      domain: blob.core.windows.net
-      account: devstorageaccount
+      - dataType: Text
+        name: domain
+        value: blob.core.windows.net
+      - dataType: Text
+        name: account
+        value: devstorageaccount  
     test:
-      domain: blob.core.windows.net
-      account: teststorageaccount
+      - dataType: Text
+        name: domain
+        value: blob.core.windows.net
+      - dataType: Text
+        name: account
+        value: teststorageaccount    
 
   sqlServer:
     dev:
-      server: devsql.database.windows.net
-      database: DevDB
+      - dataType: Text
+        name: server
+        value: devsql.database.windows.net
+      - dataType: Text
+        name: database
+        value: DevDB      
     test:
-      server: testsql.database.windows.net
-      database: TestDB
+      - dataType: Text
+        name: server
+        value: testsql.database.windows.net
+      - dataType: Text
+        name: database
+        value: TestDB

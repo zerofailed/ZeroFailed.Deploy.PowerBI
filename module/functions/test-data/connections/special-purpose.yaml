@@ -10,8 +10,13 @@ cloudConnections:
       secretUrl: https://endjintest.vault.azure.net/secrets/custom-secret/
       tenantId: 1c89d1da-a483-414f-ac8c-ccaf199db0a7
     target:
-      domain: blob.core.windows.net
-      account: customstorage
+      parameters:
+        - dataType: Text
+          name: domain
+          value: blob.core.windows.net
+        - dataType: Text
+          name: account
+          value: customstorage
     permissions:
       owners:
         - jessica.hill@endjin.com

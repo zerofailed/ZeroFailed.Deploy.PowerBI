@@ -23,7 +23,9 @@ cloudConnections:
     useServicePrincipal: development
     target:
       useTarget: sqlServer.dev
-      database: overridden
+      parameters:
+        - name: database
+          value: overridden
     permissions:
       owners:
         - jessica.hill@endjin.com
