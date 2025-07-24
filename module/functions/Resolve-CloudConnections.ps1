@@ -97,6 +97,9 @@ function Resolve-CloudConnections {
                         # Process parameter overrides efficiently
                         $newParameters = [System.Collections.Generic.List[object]]::new()
                         foreach ($paramOverride in $conn.target.parameters) {
+                            if (!$paramOverride.ContainsKey('name') -or !$paramOverride.ContainsKey('value')) {
+                                throw "A parameter override for the '$($conn.displayName)' connection is missing at least one required key: name, value"
+                            }
                             if ($targetLookup.ContainsKey($paramOverride.name)) {
                                 # Update existing parameter value
                                 $denormalized.target[$targetLookup[$paramOverride.name]].value = $paramOverride.value
@@ -130,6 +133,7 @@ function Resolve-CloudConnections {
         return $denormalizedConnections
     }
     catch {
-        throw "Error processing cloud connections: $_"
+        Write-Error 'Error whilst processing cloud connection configuration files' -ErrorAction Continue
+        throw $_
     }
 }
