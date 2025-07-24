@@ -61,6 +61,10 @@ function _Resolve-EmailAddressesToPrincipals
                 Write-Verbose "Resolved $email as User with ID: $($user.id)"
                 continue
             } catch {
+                # Only continue the search if we got a NotFound response
+                if ( $_.Exception.Response.StatusCode -ne 404) {
+                    throw $_
+                }
                 Write-Verbose "Not found as user, trying group resolution for: $email"
             }
 
@@ -80,6 +84,10 @@ function _Resolve-EmailAddressesToPrincipals
                     continue
                 }
             } catch {
+                # Only continue the search if we got a NotFound response
+                if ( $_.Exception.Response.StatusCode -ne 404) {
+                    throw $_
+                }
                 Write-Verbose "Not found as group for: $email"
             }
 
@@ -99,6 +107,10 @@ function _Resolve-EmailAddressesToPrincipals
                     continue
                 }
             } catch {
+                # Only continue the search if we got a NotFound response
+                if ( $_.Exception.Response.StatusCode -ne 404) {
+                    throw $_
+                }
                 Write-Verbose "Not found as service principal for: $email"
             }
 
