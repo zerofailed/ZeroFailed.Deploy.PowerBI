@@ -3,15 +3,18 @@
 # </copyright>
 
 . $PSScriptRoot/powerbi.properties.ps1
+
 task deployPowerBISharedCloudConnection -After ProvisionCore {
 
     $token = Get-AzAccessToken -AsSecureString -ResourceUrl 'https://api.fabric.microsoft.com'
     $graphToken = Get-AzAccessToken -AsSecureString -ResourceUrl 'https://graph.microsoft.com'
-    $cloudConnections = Resolve-CloudConnections -ConfigPath $powerBIconfig
+    $cloudConnections = Resolve-CloudConnections -ConfigPath $powerBIconfig -ConnectionFilter $CloudConnectionFilter
 
     foreach ($connection in $cloudConnections) {
 
         if (($connection | Get-Member -Name servicePrincipal) -and $connection.servicePrincipal.ContainsKey("secretUrl")) {
+
+            Write-Build Green "`nProcessing shared cloud connection: $($connection.displayName)"
 
             $secretValue = Get-AzKeyVaultSecret -Id $connection.servicePrincipal.secretUrl
 
@@ -26,11 +29,13 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
                 AccessToken = $token.Token
             }
 
+            Write-Build White "Configuring cloud connection..."
             $connectionResult = Assert-PBIShareableCloudConnection @splat
+            Write-Build Green "✅ Cloud connection configured [Id=$($connectionResult.Id)]"
 
             # Manage permissions if specified
             if ($connection.permissions) {
-                Write-Build white "Managing permissions for connection: $($connection.displayName)"
+                Write-Build White "Processing permissions..."
                 
                 try {
                     $permissionResult = Assert-PBICloudConnectionPermissionGroups `
@@ -44,11 +49,11 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
 
 
                     if ($permissionResult.Success) {
-                        Write-Build white "Successfully synchronized permissions for connection: $($connection.displayName)"
-                        Write-Build white "  - Identities resolved: $($permissionResult.Summary.TotalIdentitiesResolved)"
-                        Write-Build white "  - Permissions added: $($permissionResult.Summary.PermissionsAdded)"
-                        Write-Build white "  - Permissions updated: $($permissionResult.Summary.PermissionsUpdated)"
-                        Write-Build white "  - Permissions removed: $($permissionResult.Summary.PermissionsRemoved)"
+                        Write-Build Green "✅ Cloud connection permissions synchronized"
+                        Write-Build White "  - Identities resolved: $($permissionResult.Summary.TotalIdentitiesResolved)"
+                        Write-Build White "  - Permissions added: $($permissionResult.Summary.PermissionsAdded)"
+                        Write-Build White "  - Permissions updated: $($permissionResult.Summary.PermissionsUpdated)"
+                        Write-Build White "  - Permissions removed: $($permissionResult.Summary.PermissionsRemoved)"
                     } else {
                         Write-Warning "Permission synchronization completed with errors for connection: $($connection.displayName)"
                         foreach ($permissionError in $permissionResult.Errors) {
@@ -59,7 +64,7 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
                     throw "Failed to manage permissions for connection $($connection.displayName): $($_.Exception.Message)"     
                 }
             } else {
-                Write-Build white "No permissions specified for connection: $($connection.displayName)"
+                Write-Build White "No permissions specified for connection: $($connection.displayName)"
             }
         }
     }

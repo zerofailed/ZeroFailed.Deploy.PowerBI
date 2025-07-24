@@ -5,8 +5,11 @@
 # Synopsis: Power BI properties for shared cloud connections.
 $PowerBIconfig = "./pbiconfig/config.yaml"
 
-# Synopsis: When true, runs the process in a 'report only' mode, where no actual changes are made; defaults to False
+# Synopsis: When true, runs the process in a 'report only' mode, where no actual changes are made
 $PowerBiDryRunMode = $false
 
-# Synopsis: When false, any error will abort the whole process, otherwise errors will be reported by processing will continue; defaults to True
+# Synopsis: When false, any error will abort the whole process, otherwise errors will be reported by processing will continue
 $PowerBiContinueOnError = $true
+
+# Synopsis: An array of wildcard expressions used to filter which cloud connections will be processed, based on their display name
+$CloudConnectionFilter ??= @()

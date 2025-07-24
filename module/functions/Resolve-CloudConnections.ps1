@@ -2,6 +2,8 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
+using namespace System.Collections.Generic
+
 <#
 .SYNOPSIS
 Resolves and denormalizes cloud connection configurations from YAML files.
@@ -14,6 +16,9 @@ It handles the resolution of references and merges global settings into each con
 .PARAMETER ConfigPath
 The path to the main configuration YAML file (e.g., config.yaml).
 
+.PARAMETER ConnectionFilter
+An array of wildcard string expressions used to filter the connections that will be processed, based on their display name.
+
 .OUTPUTS
 Returns a list of denormalized cloud connection objects, each containing all resolved details.
 
@@ -22,17 +27,21 @@ $connections = Resolve-CloudConnections -ConfigPath "C:\config\main.yaml"
 foreach ($conn in $connections) {
     Write-Host "Connection: $($conn.displayName), Type: $($conn.type)"
 }
+
+.EXAMPLE
+$connections = Resolve-CloudConnections -ConfigPath "C:\config\main.yaml" -ConnectionFilter SQL*DEV*
+foreach ($conn in $connections) {
+    Write-Host "Connection: $($conn.displayName), Type: $($conn.type)"
+}
 #>
-
-# PowerShell module for processing cloud connection configurations
-using namespace System.Collections.Generic
-
-
 function Resolve-CloudConnections {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [string]$ConfigPath
+        [string]$ConfigPath,
+
+        [Parameter(Mandatory=$false)]
+        [string[]]$ConnectionFilter
     )
 
     # Load main configuration
@@ -54,77 +63,104 @@ function Resolve-CloudConnections {
         # Process each connection group
         $denormalizedConnections = [List[object]]::new()
 
+        # Filter connections if ConnectionFilter is provided
+        $connectionsToProcess = [List[object]]::new()
         foreach ($group in $config.configurationFiles.connections) {
+            # TODO: Extract this logic to a private function
             $groupName = $group.Keys[0]
             $groupPath = Join-Path $configDir $group.Values[0]
-            $connections = (Get-YamlContent -Path $groupPath).cloudConnections
-
-            # Process each connection in the group
-            foreach ($conn in $connections) {
-                $denormalized = @{
-                    groupName = $groupName
-                    displayName = $conn.displayName
-                    type = $conn.type
-                }
-
-                # Resolve service principal
-                if ($conn.useServicePrincipal) {
-                    $sp = _Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference $conn.useServicePrincipal
-                    $denormalized.servicePrincipal = $sp
-                }
-                else {
-                    $denormalized.servicePrincipal = $conn.servicePrincipal
-                }
-
-                # Apply the default tenant ID if one hasn't been specified
-                if (!$denormalized.servicePrincipal.ContainsKey('tenantId') -or [string]::IsNullOrEmpty($denormalized.servicePrincipal['tenantId'])) {
-                    Write-Verbose "Applying default tenant ID to service principal: $($denormalized.servicePrincipal)"
-                    $denormalized.servicePrincipal['tenantId'] = $config.settings.defaultTenantId
-                }
-
-                # Resolve connection target
-                if ($conn.target.useTarget) {
-                    $target = _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference $conn.target.useTarget
-                    $denormalized.target = $target
-                    # Override connection target properties (e.g. the database name on a SQL connection)
-                    if ($conn.target.ContainsKey('parameters')) {
-                        # Convert target array to hashtable for O(1) lookup and direct manipulation
-                        $targetParams = @{}
-                        foreach ($param in $denormalized.target) {
-                            $targetParams[$param.name] = $param
+            $connectionsInGroup = (Get-YamlContent -Path $groupPath).cloudConnections
+            
+            if ($PSBoundParameters.ContainsKey('ConnectionFilter') -and $ConnectionFilter.Count -gt 0) {
+                foreach ($conn in $connectionsInGroup) {
+                    $displayName = $conn.displayName
+                    $matched = $false
+                    foreach ($filterPattern in $ConnectionFilter) {
+                        if ($displayName -like $filterPattern) {
+                            $matched = $true
+                            break
                         }
-                        
-                        # Process parameter overrides with direct hashtable operations
-                        foreach ($paramOverride in $conn.target.parameters) {
-                            if (!$paramOverride.ContainsKey('name') -or !$paramOverride.ContainsKey('value')) {
-                                throw "A parameter override for the '$($conn.displayName)' connection is missing at least one required key: name, value"
-                            }
-                            
-                            if ($targetParams.ContainsKey($paramOverride.name)) {
-                                # Update existing parameter value directly
-                                $targetParams[$paramOverride.name].value = $paramOverride.value
-                            } else {
-                                # Add new parameter directly to hashtable
-                                $targetParams[$paramOverride.name] = $paramOverride
-                            }
-                        }
-                        
-                        # Convert back to array in one operation
-                        $denormalized.target = $targetParams.Values
                     }
-                }
-                else {
-                    $denormalized.target = $conn.target.parameters
-                }
-
-                # Copy permissions
-                $denormalized.permissions = $conn.permissions
-
-                # Add global settings
-                $denormalized.settings = $config.settings
-
-                $denormalizedConnections.Add([PSCustomObject]$denormalized)
+                    if ($matched) {
+                        $connectionsToProcess.Add($conn)
+                    }
+                }                
+            } else {
+                $connectionsToProcess.AddRange($connectionsInGroup)
             }
+        }
+
+        if ($connectionsToProcess.Count -eq 0) {
+            Write-Warning "No connections matched the provided filter(s): $($ConnectionFilter -join ', ')"
+        }
+
+        # Process each connection in the group
+        foreach ($conn in $connectionsToProcess) {
+            $denormalized = @{
+                groupName = $groupName
+                displayName = $conn.displayName
+                type = $conn.type
+            }
+
+            # Resolve service principal
+            if ($conn.useServicePrincipal) {
+                $sp = _Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference $conn.useServicePrincipal
+                $denormalized.servicePrincipal = $sp
+            }
+            else {
+                $denormalized.servicePrincipal = $conn.servicePrincipal
+            }
+
+            # Apply the default tenant ID if one hasn't been specified
+            if (!$denormalized.servicePrincipal.ContainsKey('tenantId') -or [string]::IsNullOrEmpty($denormalized.servicePrincipal['tenantId'])) {
+                Write-Verbose "Applying default tenant ID to service principal: $($denormalized.servicePrincipal)"
+                $denormalized.servicePrincipal['tenantId'] = $config.settings.defaultTenantId
+            }
+
+            # Resolve connection target
+            if ($conn.target.useTarget) {
+                $target = _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference $conn.target.useTarget
+                $denormalized.target = $target
+                # Override connection target properties (e.g. the database name on a SQL connection)
+                if ($conn.target.ContainsKey('parameters')) {
+                    # TODO: Extract this logic to private function
+                    
+                    # Convert target array to hashtable for O(1) lookup and direct manipulation
+                    $targetParams = @{}
+                    foreach ($param in $denormalized.target) {
+                        $targetParams[$param.name] = $param
+                    }
+                    
+                    # Process parameter overrides with direct hashtable operations
+                    foreach ($paramOverride in $conn.target.parameters) {
+                        if (!$paramOverride.ContainsKey('name') -or !$paramOverride.ContainsKey('value')) {
+                            throw "A parameter override for the '$($conn.displayName)' connection is missing at least one required key: name, value"
+                        }
+                        
+                        if ($targetParams.ContainsKey($paramOverride.name)) {
+                            # Update existing parameter value directly
+                            $targetParams[$paramOverride.name].value = $paramOverride.value
+                        } else {
+                            # Add new parameter directly to hashtable
+                            $targetParams[$paramOverride.name] = $paramOverride
+                        }
+                    }
+                    
+                    # Convert back to array in one operation
+                    $denormalized.target = $targetParams.Values
+                }
+            }
+            else {
+                $denormalized.target = $conn.target.parameters
+            }
+
+            # Copy permissions
+            $denormalized.permissions = $conn.permissions
+
+            # Add global settings
+            $denormalized.settings = $config.settings
+
+            $denormalizedConnections.Add([PSCustomObject]$denormalized)
         }
 
         return $denormalizedConnections

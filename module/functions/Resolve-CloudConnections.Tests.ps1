@@ -63,4 +63,32 @@ Describe 'Resolve-CloudConnections' {
             Should -Invoke Write-Error -Exactly 1 -ParameterFilter { $Message -eq 'Error whilst processing cloud connection configuration files' }
         }
     }
+
+    Context 'When filtering connections' {
+        It 'Should correctly filter for a single pattern' {
+            $connections = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter "Development*"
+            $connections.Count | Should -Be 2
+            $connections[0].displayName | Should -Be "Development Blob Storage"
+            $connections[1].displayName | Should -Be "Development SQL Database"
+        }
+
+        It 'Should correctly filter for multiple patterns' {
+            $connections = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter @("Test*", "Custom*")
+            $connections.Count | Should -Be 3
+            ($connections.displayName -contains "Test Blob Storage") | Should -Be $true
+            ($connections.displayName -contains "Test SQL Database") | Should -Be $true
+            ($connections.displayName -contains "Custom Blob Storage") | Should -Be $true
+        }
+
+        It 'Should process all connections when no filter is provided' {
+            $connections = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml"
+            $connections.Count | Should -Be 6
+        }
+
+        It 'Should log a warning when no connections match the filter' {
+            Mock Write-Warning {}
+            Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter "NON_EXISTENT_*"
+            Should -Invoke Write-Warning -ParameterFilter { $Message -eq 'No connections matched the provided filter(s): NON_EXISTENT_*' }
+        }
+    }
 }
