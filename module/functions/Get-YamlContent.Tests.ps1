@@ -20,7 +20,10 @@ Describe 'Get-YamlContent' {
         It 'Should load connection targets configuration' {
             $result = Get-YamlContent -Path "$testDataDir/connectionTargets.yaml"
             $result.connectionTargets | Should -Not -BeNullOrEmpty
-            $result.connectionTargets.blobStorage.dev.domain | Should -Be 'blob.core.windows.net'
+            $result.connectionTargets.blobStorage.dev[0].name | Should -Be 'domain'
+            $result.connectionTargets.blobStorage.dev[0].value | Should -Be 'blob.core.windows.net'
+            $result.connectionTargets.blobStorage.dev[1].name | Should -Be 'account'
+            $result.connectionTargets.blobStorage.dev[1].value | Should -Be 'devstorageaccount'
         }
 
         It 'Should load main configuration' {

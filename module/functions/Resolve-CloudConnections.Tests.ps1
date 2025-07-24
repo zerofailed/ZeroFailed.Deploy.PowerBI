@@ -28,14 +28,16 @@ Describe 'Resolve-CloudConnections' {
             $devConnection | Should -Not -BeNullOrEmpty
             $devConnection.type | Should -Be 'AzureBlobs'
             $devConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
-            $devConnection.target.domain | Should -Be 'blob.core.windows.net'
+            $devConnection.target[0].name | Should -Be 'domain'
+            $devConnection.target[0].value | Should -Be 'blob.core.windows.net'
             $devConnection.permissions.owners | Should -Contain 'jessica.hill@endjin.com'
 
             # Verify custom connection properties
             $customConnection = $results | Where-Object { $_.displayName -eq 'Custom Blob Storage' }
             $customConnection | Should -Not -BeNullOrEmpty
             $customConnection.servicePrincipal.clientId | Should -Be '943a5f46-86eb-4a39-b34f-cb3046dfa30d'
-            $customConnection.target.account | Should -Be 'customstorage'
+            $customConnection.target[1].name | Should -Be 'account'
+            $customConnection.target[1].value | Should -Be 'customstorage'
         }
 
         It "Should apply connection target property overrides specified on the cloud connection definition" {
@@ -44,8 +46,10 @@ Describe 'Resolve-CloudConnections' {
             $sqlConnection.type | Should -Be 'SQL'
             $sqlConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
             $sqlConnection.servicePrincipal.tenantId | Should -Be '00000000-0000-0000-0000-000000000001'
-            $sqlConnection.target.server | Should -Be 'devsql.database.windows.net'
-            $sqlConnection.target.database | Should -Be 'overridden'
+            $sqlConnection.target[0].name | Should -Be 'server'
+            $sqlConnection.target[0].value | Should -Be 'devsql.database.windows.net'
+            $sqlConnection.target[1].name | Should -Be 'database'
+            $sqlConnection.target[1].value | Should -Be 'overridden'
         }
 
         It "Should apply the default tenant ID when a service principal does not define its own" {

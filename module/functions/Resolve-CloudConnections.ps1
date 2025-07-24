@@ -87,12 +87,34 @@ function Resolve-CloudConnections {
                     $target = _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference $conn.target.useTarget
                     $denormalized.target = $target
                     # Override connection target properties (e.g. the database name on a SQL connection)
-                    $conn.target.GetEnumerator() | 
-                        Where-Object { $_.Key -ne 'useTarget' } | 
-                        ForEach-Object { $denormalized.target[$_.Key] = $_.Value }
+                    if ($conn.target.ContainsKey('parameters')) {
+                        # Create a hashtable for efficient parameter lookup
+                        $targetLookup = @{}
+                        for ($i = 0; $i -lt $denormalized.target.Count; $i++) {
+                            $targetLookup[$denormalized.target[$i].name] = $i
+                        }
+                        
+                        # Process parameter overrides efficiently
+                        $newParameters = [System.Collections.Generic.List[object]]::new()
+                        foreach ($paramOverride in $conn.target.parameters) {
+                            if ($targetLookup.ContainsKey($paramOverride.name)) {
+                                # Update existing parameter value
+                                $denormalized.target[$targetLookup[$paramOverride.name]].value = $paramOverride.value
+                            }
+                            else {
+                                # Add new parameter to the list for later addition
+                                $newParameters.Add($paramOverride)
+                            }
+                        }
+                        
+                        # Add all new parameters at once
+                        if ($newParameters.Count -gt 0) {
+                            $denormalized.target += $newParameters.ToArray()
+                        }
+                    }
                 }
                 else {
-                    $denormalized.target = $conn.target
+                    $denormalized.target = $conn.target.parameters
                 }
 
                 # Copy permissions
