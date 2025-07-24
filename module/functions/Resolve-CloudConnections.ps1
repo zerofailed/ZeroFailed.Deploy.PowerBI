@@ -40,6 +40,9 @@ function Resolve-CloudConnections {
         [Parameter(Mandatory)]
         [string]$ConfigPath,
 
+        [Parameter()]
+        [string]$ConnectionsConfigPath = 'connections',
+
         [Parameter(Mandatory=$false)]
         [string[]]$ConnectionFilter
     )
@@ -63,13 +66,24 @@ function Resolve-CloudConnections {
         # Process each connection group
         $denormalizedConnections = [List[object]]::new()
 
+        # Resolve path to the connection configuration files
+        if (![IO.Path]::IsPathRooted($ConnectionsConfigPath)) {
+            $ConnectionsConfigPath = Join-Path (Split-Path -Parent $ConfigPath) $ConnectionsConfigPath
+        }
+        $ConnectionsConfigPath = Resolve-Path $ConnectionsConfigPath
+
+        # Look for connection config files in the specified directory
+        Write-Information "Looking for connection configuration files under '$ConnectionsConfigPath'" -InformationAction Continue
+        $connectionConfigFiles = Get-ChildItem -Path $ConnectionsConfigPath -Filter *.yaml -Recurse
+        Write-Information "Found $($connectionConfigFiles.Count) file(s)" -InformationAction Continue
+        
         # Filter connections if ConnectionFilter is provided
         $connectionsToProcess = [List[object]]::new()
-        foreach ($group in $config.configurationFiles.connections) {
+        foreach ($connectionConfigFile in $connectionConfigFiles) {
             # TODO: Extract this logic to a private function
-            $groupName = $group.Keys[0]
-            $groupPath = Join-Path $configDir $group.Values[0]
-            $connectionsInGroup = (Get-YamlContent -Path $groupPath).cloudConnections
+            
+            # Parse the contents of each YAML file in the group
+            $connectionsInGroup = (Get-YamlContent -Path $connectionConfigFile).cloudConnections
             
             if ($PSBoundParameters.ContainsKey('ConnectionFilter') -and $ConnectionFilter.Count -gt 0) {
                 foreach ($conn in $connectionsInGroup) {
@@ -97,7 +111,6 @@ function Resolve-CloudConnections {
         # Process each connection in the group
         foreach ($conn in $connectionsToProcess) {
             $denormalized = @{
-                groupName = $groupName
                 displayName = $conn.displayName
                 type = $conn.type
             }

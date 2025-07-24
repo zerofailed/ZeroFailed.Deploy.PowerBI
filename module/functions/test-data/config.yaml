@@ -6,12 +6,6 @@ configurationFiles:
   servicePrincipals: servicePrincipals.yaml
   connectionTargets: connectionTargets.yaml
   
-  # Connection group files
-  connections:
-    - development: connections/development.yaml
-    - testing: connections/testing.yaml
-    - specialPurpose: connections/special-purpose.yaml
-
 # Global settings
 settings:
   # vaultBaseUrl: https://endjintest.vault.azure.net/secrets

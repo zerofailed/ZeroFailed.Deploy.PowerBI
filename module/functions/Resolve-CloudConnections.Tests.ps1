@@ -12,6 +12,8 @@ Describe 'Resolve-CloudConnections' {
         . (Join-Path $PSScriptRoot 'Get-YamlContent.ps1')
         . (Join-Path $PSScriptRoot '_Resolve-ServicePrincipal.ps1')
         . (Join-Path $PSScriptRoot '_Resolve-ConnectionTarget.ps1')
+
+        Mock Write-Information {}
     }
 
     Context 'When processing all configuration files' {

@@ -12,4 +12,7 @@ $PowerBiDryRunMode = $false
 $PowerBiContinueOnError = $true
 
 # Synopsis: An array of wildcard expressions used to filter which cloud connections will be processed, based on their display name
-$CloudConnectionFilter ??= @()
+$CloudConnectionFilters ??= @()
+
+# Synopsis: TBC
+$CloudConnectionsConfigPath ??= ''

@@ -8,7 +8,10 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
 
     $token = Get-AzAccessToken -AsSecureString -ResourceUrl 'https://api.fabric.microsoft.com'
     $graphToken = Get-AzAccessToken -AsSecureString -ResourceUrl 'https://graph.microsoft.com'
-    $cloudConnections = Resolve-CloudConnections -ConfigPath $powerBIconfig -ConnectionFilter $CloudConnectionFilter
+    $cloudConnections = Resolve-CloudConnections `
+                                -ConfigPath $powerBIconfig `
+                                -ConnectionsConfigPath $CloudConnectionsConfigPath `
+                                -ConnectionFilter $CloudConnectionFilters
 
     foreach ($connection in $cloudConnections) {
 
