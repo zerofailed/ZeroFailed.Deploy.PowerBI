@@ -1,4 +1,4 @@
-# <copyright file="_Resolve-EmailAddressesToPrincipals.ps1" company="Endjin Limited">
+# <copyright file="_Resolve-IdentityNamesToPrincipals.ps1" company="Endjin Limited">
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
@@ -21,12 +21,12 @@ Secure string containing the access token for the Microsoft Graph API.
 Returns an array of hashtables, each containing 'emailAddress', 'principalId', and 'principalType' for resolved identities.
 
 .EXAMPLE
-$resolved = _Resolve-EmailAddressesToPrincipals `
+$resolved = _Resolve-IdentityNamesToPrincipals `
     -EmailAddresses @("user1@company.com", "group@company.com") `
     -GraphAccessToken $graphToken.Token
 #>
 
-function _Resolve-EmailAddressesToPrincipals
+function _Resolve-IdentityNamesToPrincipals
 {
     [CmdletBinding()]
     param (

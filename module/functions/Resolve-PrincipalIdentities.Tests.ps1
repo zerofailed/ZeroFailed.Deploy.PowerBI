@@ -8,7 +8,7 @@ Describe "Resolve-PrincipalIdentities" {
         # Dot source the function files
         . $PSScriptRoot/Resolve-PrincipalIdentities.ps1
         . $PSScriptRoot/Clear-PrincipalIdentityCache.ps1
-        . $PSScriptRoot/_Resolve-EmailAddressesToPrincipals.ps1
+        . $PSScriptRoot/_Resolve-IdentityNamesToPrincipals.ps1
         
         Mock Write-Warning {}
     }
@@ -58,7 +58,7 @@ Describe "Resolve-PrincipalIdentities" {
             $identities = @("user@domain.com")
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName _Resolve-EmailAddressesToPrincipals -MockWith {
+            Mock -CommandName _Resolve-IdentityNamesToPrincipals -MockWith {
                 return @(
                     @{
                         emailAddress = "user@domain.com"
@@ -83,7 +83,7 @@ Describe "Resolve-PrincipalIdentities" {
             $identities = @("group@domain.com")
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName _Resolve-EmailAddressesToPrincipals -MockWith {
+            Mock -CommandName _Resolve-IdentityNamesToPrincipals -MockWith {
                 return @(
                     @{
                         emailAddress = "group@domain.com"
@@ -108,7 +108,7 @@ Describe "Resolve-PrincipalIdentities" {
             $identities = @("sp@domain.com")
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName _Resolve-EmailAddressesToPrincipals -MockWith {
+            Mock -CommandName _Resolve-IdentityNamesToPrincipals -MockWith {
                 return @(
                     @{
                         emailAddress = "sp@domain.com"
@@ -133,7 +133,7 @@ Describe "Resolve-PrincipalIdentities" {
             $identities = @("unknown@domain.com")
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName _Resolve-EmailAddressesToPrincipals -MockWith {
+            Mock -CommandName _Resolve-IdentityNamesToPrincipals -MockWith {
                 return @()  # No resolutions found
             }
 
@@ -149,7 +149,7 @@ Describe "Resolve-PrincipalIdentities" {
             $identities = @("user@domain.com", "user@domain.com") # Same email twice
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName _Resolve-EmailAddressesToPrincipals -MockWith {
+            Mock -CommandName _Resolve-IdentityNamesToPrincipals -MockWith {
                 return @(
                     @{
                         emailAddress = "user@domain.com"
@@ -169,7 +169,7 @@ Describe "Resolve-PrincipalIdentities" {
 
             # Assert
             $result | Should -HaveCount 2
-            Assert-MockCalled -CommandName _Resolve-EmailAddressesToPrincipals -Times 1 # Should only call once due to caching
+            Assert-MockCalled -CommandName _Resolve-IdentityNamesToPrincipals -Times 1 # Should only call once due to caching
             $result[0].principalId | Should -Be "resolved-user-id"
             $result[1].principalId | Should -Be "resolved-user-id"
         }
@@ -179,7 +179,7 @@ Describe "Resolve-PrincipalIdentities" {
             $identities = @("user@domain.com")
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName _Resolve-EmailAddressesToPrincipals -MockWith {
+            Mock -CommandName _Resolve-IdentityNamesToPrincipals -MockWith {
                 return @(
                     @{
                         emailAddress = "user@domain.com"
@@ -197,7 +197,7 @@ Describe "Resolve-PrincipalIdentities" {
             # Assert
             $result | Should -HaveCount 1
             $result2 | Should -HaveCount 1
-            Assert-MockCalled -CommandName _Resolve-EmailAddressesToPrincipals -Times 2 # Should call twice without caching
+            Assert-MockCalled -CommandName _Resolve-IdentityNamesToPrincipals -Times 2 # Should call twice without caching
         }
     }
 
@@ -210,7 +210,7 @@ Describe "Resolve-PrincipalIdentities" {
             )
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName _Resolve-EmailAddressesToPrincipals -MockWith {
+            Mock -CommandName _Resolve-IdentityNamesToPrincipals -MockWith {
                 return @(
                     @{
                         emailAddress = "user@domain.com"

@@ -90,7 +90,7 @@ function Resolve-PrincipalIdentities
     # Resolve email addresses in batch if any exist
     if ($emailsToResolve.Count -gt 0) {
         Write-Verbose "Resolving $($emailsToResolve.Count) email addresses via Microsoft Graph"
-        $emailResolutions = _Resolve-EmailAddressesToPrincipals -EmailAddresses $emailsToResolve -GraphAccessToken $GraphAccessToken
+        $emailResolutions = _Resolve-IdentityNamesToPrincipals -EmailAddresses $emailsToResolve -GraphAccessToken $GraphAccessToken
         
         foreach ($resolution in $emailResolutions) {
             $resolvedIdentity = @{

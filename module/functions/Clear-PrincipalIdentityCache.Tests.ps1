@@ -7,7 +7,7 @@ Describe "Clear-PrincipalIdentityCache" {
     BeforeAll {
         # Dot source the function files
         . $PSScriptRoot/Clear-PrincipalIdentityCache.ps1
-        . $PSScriptRoot/_Resolve-EmailAddressesToPrincipals.ps1
+        . $PSScriptRoot/_Resolve-IdentityNamesToPrincipals.ps1
         . $PSScriptRoot/Resolve-PrincipalIdentities.ps1
     }
 
@@ -16,7 +16,7 @@ Describe "Clear-PrincipalIdentityCache" {
         $identities = @("user@domain.com")
         $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-        Mock -CommandName _Resolve-EmailAddressesToPrincipals -MockWith {
+        Mock -CommandName _Resolve-IdentityNamesToPrincipals -MockWith {
             return @(
                 @{
                     emailAddress = "user@domain.com"
@@ -35,6 +35,6 @@ Describe "Clear-PrincipalIdentityCache" {
         Resolve-PrincipalIdentities -Identities $identities -GraphAccessToken $mockToken -UseCache
 
         # Assert
-        Assert-MockCalled -CommandName _Resolve-EmailAddressesToPrincipals -Times 2 # Called twice, so cache was cleared
+        Assert-MockCalled -CommandName _Resolve-IdentityNamesToPrincipals -Times 2 # Called twice, so cache was cleared
     }
 }
