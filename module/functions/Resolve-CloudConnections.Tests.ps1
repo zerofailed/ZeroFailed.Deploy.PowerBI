@@ -28,16 +28,14 @@ Describe 'Resolve-CloudConnections' {
             $devConnection | Should -Not -BeNullOrEmpty
             $devConnection.type | Should -Be 'AzureBlobs'
             $devConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
-            $devConnection.target[0].name | Should -Be 'domain'
-            $devConnection.target[0].value | Should -Be 'blob.core.windows.net'
+            $devConnection.target | Where-Object { $_.name -eq 'domain' } | Select-Object -ExpandProperty value | Should -Be 'blob.core.windows.net'
             $devConnection.permissions.owners | Should -Contain 'jessica.hill@endjin.com'
 
             # Verify custom connection properties
             $customConnection = $results | Where-Object { $_.displayName -eq 'Custom Blob Storage' }
             $customConnection | Should -Not -BeNullOrEmpty
             $customConnection.servicePrincipal.clientId | Should -Be '943a5f46-86eb-4a39-b34f-cb3046dfa30d'
-            $customConnection.target[1].name | Should -Be 'account'
-            $customConnection.target[1].value | Should -Be 'customstorage'
+            $customConnection.target | Where-Object { $_.name -eq 'account' } | Select-Object -ExpandProperty value | Should -Be 'customstorage'
         }
 
         It "Should apply connection target property overrides specified on the cloud connection definition" {
@@ -46,10 +44,8 @@ Describe 'Resolve-CloudConnections' {
             $sqlConnection.type | Should -Be 'SQL'
             $sqlConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
             $sqlConnection.servicePrincipal.tenantId | Should -Be '00000000-0000-0000-0000-000000000001'
-            $sqlConnection.target[0].name | Should -Be 'server'
-            $sqlConnection.target[0].value | Should -Be 'devsql.database.windows.net'
-            $sqlConnection.target[1].name | Should -Be 'database'
-            $sqlConnection.target[1].value | Should -Be 'overridden'
+            $sqlConnection.target | Where-Object { $_.name -eq 'server' } | Select-Object -ExpandProperty value | Should -Be 'devsql.database.windows.net'
+            $sqlConnection.target | Where-Object { $_.name -eq 'database' } | Select-Object -ExpandProperty value | Should -Be 'overridden'
         }
 
         It "Should apply the default tenant ID when a service principal does not define its own" {
@@ -62,7 +58,9 @@ Describe 'Resolve-CloudConnections' {
 
     Context 'When handling configuration errors' {
         It 'Should throw on invalid config path' {
+            Mock Write-Error {}
             { Resolve-CloudConnections -ConfigPath 'nonexistent/config.yaml' } | Should -Throw
+            Should -Invoke Write-Error -Exactly 1 -ParameterFilter { $Message -eq 'Error whilst processing cloud connection configuration files' }
         }
     }
 }

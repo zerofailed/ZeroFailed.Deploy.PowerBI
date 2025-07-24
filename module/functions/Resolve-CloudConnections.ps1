@@ -88,32 +88,29 @@ function Resolve-CloudConnections {
                     $denormalized.target = $target
                     # Override connection target properties (e.g. the database name on a SQL connection)
                     if ($conn.target.ContainsKey('parameters')) {
-                        # Create a hashtable for efficient parameter lookup
-                        $targetLookup = @{}
-                        for ($i = 0; $i -lt $denormalized.target.Count; $i++) {
-                            $targetLookup[$denormalized.target[$i].name] = $i
+                        # Convert target array to hashtable for O(1) lookup and direct manipulation
+                        $targetParams = @{}
+                        foreach ($param in $denormalized.target) {
+                            $targetParams[$param.name] = $param
                         }
                         
-                        # Process parameter overrides efficiently
-                        $newParameters = [System.Collections.Generic.List[object]]::new()
+                        # Process parameter overrides with direct hashtable operations
                         foreach ($paramOverride in $conn.target.parameters) {
                             if (!$paramOverride.ContainsKey('name') -or !$paramOverride.ContainsKey('value')) {
                                 throw "A parameter override for the '$($conn.displayName)' connection is missing at least one required key: name, value"
                             }
-                            if ($targetLookup.ContainsKey($paramOverride.name)) {
-                                # Update existing parameter value
-                                $denormalized.target[$targetLookup[$paramOverride.name]].value = $paramOverride.value
-                            }
-                            else {
-                                # Add new parameter to the list for later addition
-                                $newParameters.Add($paramOverride)
+                            
+                            if ($targetParams.ContainsKey($paramOverride.name)) {
+                                # Update existing parameter value directly
+                                $targetParams[$paramOverride.name].value = $paramOverride.value
+                            } else {
+                                # Add new parameter directly to hashtable
+                                $targetParams[$paramOverride.name] = $paramOverride
                             }
                         }
                         
-                        # Add all new parameters at once
-                        if ($newParameters.Count -gt 0) {
-                            $denormalized.target += $newParameters.ToArray()
-                        }
+                        # Convert back to array in one operation
+                        $denormalized.target = $targetParams.Values
                     }
                 }
                 else {
