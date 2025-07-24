@@ -58,6 +58,13 @@ Describe 'Resolve-CloudConnections' {
         }
     }
 
+    Context 'When given a partial configuration path' {
+        It 'Should try using a default-named configuration file' {
+            $results = Resolve-CloudConnections -ConfigPath $testDataDir
+            $results.Count | Should -Be 6
+        }
+    }
+
     Context 'When handling configuration errors' {
         It 'Should throw on invalid config path' {
             Mock Write-Error {}

@@ -49,10 +49,14 @@ function Resolve-CloudConnections {
 
     # Load main configuration
     try {
-        $configDir = Split-Path $ConfigPath -Parent
+        if (Test-Path $ConfigPath -PathType Container) {
+            # Assume the convention-based filename if only a directory has been provided
+            $ConfigPath = Join-Path $ConfigPath 'config.yaml'
+        }
         if (-not (Test-Path $ConfigPath)) {
             throw "Configuration file not found: $ConfigPath"
         }
+        $configDir = Split-Path $ConfigPath -Parent
         $config = Get-YamlContent -Path $ConfigPath
 
         # Load service principals
