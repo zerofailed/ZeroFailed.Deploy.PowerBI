@@ -69,7 +69,7 @@ function _Resolve-EmailAddressesToPrincipals
             }
 
             # Try to resolve as group
-            $groupUri = "https://graph.microsoft.com/v1.0/groups?`$filter=mail eq '$email' or proxyAddresses/any(x:x eq 'SMTP:$email')"
+            $groupUri = "https://graph.microsoft.com/v1.0/groups?`$filter=displayName eq '$email'"
             
             try {
                 $groupResponse = Invoke-RestMethod -Uri $groupUri -Headers $headers -Method GET
@@ -92,7 +92,7 @@ function _Resolve-EmailAddressesToPrincipals
             }
 
             # Try to resolve as service principal
-            $spUri = "https://graph.microsoft.com/v1.0/servicePrincipals?`$filter=servicePrincipalNames/any(x:x eq '$email')"
+            $spUri = "https://graph.microsoft.com/v1.0/servicePrincipals?`$filter=displayName eq '$email'"
             
             try {
                 $spResponse = Invoke-RestMethod -Uri $spUri -Headers $headers -Method GET
