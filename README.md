@@ -14,10 +14,7 @@ For more information about the different component types, please refer to the [Z
 
 This extension consists of the following feature groups, click the links to see their documentation:
 
-- ARM deployments
-- Application deployment
-- Monitoring integrations
-- Security
+- Shared Cloud Connections (inc. permissions)
 
 ## Dependencies
 

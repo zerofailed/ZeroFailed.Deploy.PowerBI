@@ -3,7 +3,7 @@
 # </copyright>
 
 # Synopsis: Power BI properties for shared cloud connections.
-$PowerBIconfig = "./pbiconfig/config.yaml"
+$PowerBiConfig = "./pbiconfig/config.yaml"
 
 # Synopsis: When true, runs the process in a 'report only' mode, where no actual changes are made
 $PowerBiDryRunMode = $false

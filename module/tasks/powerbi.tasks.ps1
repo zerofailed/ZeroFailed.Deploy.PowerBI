@@ -4,12 +4,28 @@
 
 . $PSScriptRoot/powerbi.properties.ps1
 
+# Synopsis: Ensures that the required module for YAML parsing is installed as part of the 'setupModules' task provided by the ZeroFailed.DevOps.Common extension
+task ensurePowerShellYamlModule -Before setupModules {
+
+    if (!$RequiredPowerShellModules.ContainsKey('powershell-yaml')) {
+        $script:RequiredPowerShellModules += @{
+            'powershell-yaml' = @{
+                version = '0.4.7'
+            }
+        }
+    }
+}
+
+# Synopsis: Configures PowerBI/Fabric shared cloud connections and manages their permissions
 task deployPowerBISharedCloudConnection -After ProvisionCore {
 
+    Write-Build White "Requesting required API access tokens..."
     $token = Get-AzAccessToken -AsSecureString -ResourceUrl 'https://api.fabric.microsoft.com'
     $graphToken = Get-AzAccessToken -AsSecureString -ResourceUrl 'https://graph.microsoft.com'
+
+    Write-Build White "Reading configuration files..."
     $cloudConnections = Resolve-CloudConnections `
-                                -ConfigPath $powerBIconfig `
+                                -ConfigPath $PowerBiConfig `
                                 -ConnectionsConfigPath $CloudConnectionsConfigPath `
                                 -ConnectionFilter $CloudConnectionFilters
 
