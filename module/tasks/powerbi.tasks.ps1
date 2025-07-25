@@ -35,7 +35,25 @@ task deployPowerBISharedCloudConnection -After ProvisionCore {
 
             Write-Build Green "`nProcessing shared cloud connection: $($connection.displayName)"
 
-            $secretValue = Get-AzKeyVaultSecret -Id $connection.servicePrincipal.secretUrl
+            # Lookup the KV secret based on the available version of the module
+            if ((Get-Module Az.KeyVault | Select-Object -ExpandProperty Version) -ge [Version]'7.3.0') {
+                $secretValue = Get-AzKeyVaultSecret -SecretId $connection.servicePrincipal.secretUrl
+            }
+            else {
+                Write-Build White 'Parsing Secret URI for older version of Az.KeyVault module...'
+                $secretUri = [uri]$connection.servicePrincipal.secretUrl
+                $splat = @{
+                    vaultName = $secretUri.Host.Split('.') | Select-Object -First 1
+                    secretName = $secretUri.Segments[2].TrimEnd('/')
+                }
+                if ($secretUri.Segments.Count -gt 3) {
+                    $splat += @{
+                        secretVersion = $secretUri.Segments[3].TrimEnd('/')
+                    }
+                }
+                Write-Build White "Args: $($splat | ConvertTo-Json -compress)"
+                $secretValue = Get-AzKeyVaultSecret @splat
+            }
 
             # Create or update the cloud connection
             $splat = @{
