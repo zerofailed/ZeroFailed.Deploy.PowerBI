@@ -119,12 +119,6 @@ PrivateData = @{
     ZeroFailed = @{
         ExtensionDependencies = @(
             @{
-                # Test pre-release fix
-                Name = "ZeroFailed.DevOps.Common"
-                GitRepository = "https://github.com/zerofailed/ZeroFailed.DevOps.Common"
-                GitRef = "feature/fix-setupmodules-tasks"
-            }
-            @{
                 # Assume latest stable version
                 Name = "ZeroFailed.Deploy.Common"
                 GitRepository = "https://github.com/zerofailed/ZeroFailed.Deploy.Common"

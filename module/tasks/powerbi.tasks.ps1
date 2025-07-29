@@ -10,14 +10,15 @@ task ensurePowerShellYamlModule -Before setupModules {
     if (!$RequiredPowerShellModules.ContainsKey('powershell-yaml')) {
         $script:RequiredPowerShellModules += @{
             'powershell-yaml' = @{
-                version = '0.4.7'
+                version = '[0.4.7,1.0)'
+                repository = 'PSGallery'
             }
         }
     }
 }
 
 # Synopsis: Configures PowerBI/Fabric shared cloud connections and manages their permissions
-task deployPowerBISharedCloudConnection -After ProvisionCore {
+task deployPowerBISharedCloudConnection -After DeployCore {
 
     Write-Build White "Requesting required API access tokens..."
     $token = Get-AzAccessToken -AsSecureString -ResourceUrl 'https://api.fabric.microsoft.com'
