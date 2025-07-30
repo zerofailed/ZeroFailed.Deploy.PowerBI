@@ -48,8 +48,9 @@ function Resolve-PrincipalIdentities
     )
 
     # Initialize cache if not exists
-    if ($UseCache -and !(Test-Path variable:/PrincipalIdentityCache) -and !$script:PrincipalIdentityCache) {
+    if ($UseCache -and (!(Test-Path variable:/PrincipalIdentityCache) -or $PrincipalIdentityCache -isnot [hashtable])) {
         $script:PrincipalIdentityCache = @{}
+        Write-Verbose "Resolve-PrincipalIdentities: Principal identity cache initialised"
     }
 
     $resolvedIdentities = @()

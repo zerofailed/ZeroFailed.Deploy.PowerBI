@@ -23,7 +23,11 @@ function Clear-PrincipalIdentityCache
     [CmdletBinding()]
     param()
     
-    if ($script:PrincipalIdentityCache) {
+    if (!(Test-Path variable:/PrincipalIdentityCache) -or $PrincipalIdentityCache -isnot [hashtable]) {
+        $script:PrincipalIdentityCache = @{}
+        Write-Verbose "Clear-PrincipalIdentityCache: Principal identity cache initialised"
+    }
+    else ($script:PrincipalIdentityCache) {
         $script:PrincipalIdentityCache.Clear()
         Write-Verbose "Principal identity cache cleared"
     }
