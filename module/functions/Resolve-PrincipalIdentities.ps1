@@ -48,7 +48,7 @@ function Resolve-PrincipalIdentities
     )
 
     # Initialize cache if not exists
-    if ($UseCache -and -not $script:PrincipalIdentityCache) {
+    if ($UseCache -and !(Test-Path variable:/PrincipalIdentityCache) -and !$script:PrincipalIdentityCache) {
         $script:PrincipalIdentityCache = @{}
     }
 
