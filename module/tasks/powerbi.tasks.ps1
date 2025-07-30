@@ -41,7 +41,7 @@ task deployPowerBISharedCloudConnection -After DeployCore {
                 $secretValue = Get-AzKeyVaultSecret -SecretId $connection.servicePrincipal.secretUrl
             }
             else {
-                Write-Build White 'Parsing Secret URI for older version of Az.KeyVault module...'
+                Write-Verbose 'Parsing Secret URI for older version of Az.KeyVault module...'
                 $secretUri = [uri]$connection.servicePrincipal.secretUrl
                 $splat = @{
                     vaultName = $secretUri.Host.Split('.') | Select-Object -First 1
@@ -52,7 +52,7 @@ task deployPowerBISharedCloudConnection -After DeployCore {
                         secretVersion = $secretUri.Segments[3].TrimEnd('/')
                     }
                 }
-                Write-Build White "Args: $($splat | ConvertTo-Json -compress)"
+                Write-Verbose "Args: $($splat | ConvertTo-Json -compress)"
                 $secretValue = Get-AzKeyVaultSecret @splat
             }
 
