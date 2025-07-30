@@ -27,7 +27,7 @@ function Clear-PrincipalIdentityCache
         $script:PrincipalIdentityCache = @{}
         Write-Verbose "Clear-PrincipalIdentityCache: Principal identity cache initialised"
     }
-    else ($script:PrincipalIdentityCache) {
+    else {
         $script:PrincipalIdentityCache.Clear()
         Write-Verbose "Principal identity cache cleared"
     }
