@@ -77,7 +77,7 @@ function Resolve-CloudConnections {
         $ConnectionsConfigPath = Resolve-Path $ConnectionsConfigPath
 
         # Look for connection config files in the specified directory
-        Write-Information "Looking for connection configuration files under '$ConnectionsConfigPath'"
+        Write-Information "Looking for connection configuration files under '$ConnectionsConfigPath'" -InformationAction Continue
         [array]$connectionConfigFiles = Get-ChildItem -Path $ConnectionsConfigPath -Filter *.yaml -Recurse
 
         if (!$connectionConfigFiles) {
@@ -85,7 +85,7 @@ function Resolve-CloudConnections {
             return
         }
 
-        Write-Information "Found $($connectionConfigFiles.Count) file(s)"
+        Write-Information "Found $($connectionConfigFiles.Count) file(s)" -InformationAction Continue
         
         # Filter connections if ConnectionFilter is provided
         $connectionsToProcess = [List[object]]::new()
