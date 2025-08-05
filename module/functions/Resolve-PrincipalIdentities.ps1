@@ -33,6 +33,8 @@ $identities = @(
 $resolved = Resolve-PrincipalIdentities -Identities $identities -GraphAccessToken $graphToken
 #>
 
+using namespace System.Collections.Generic
+
 function Resolve-PrincipalIdentities
 {
     [CmdletBinding()]
@@ -53,7 +55,7 @@ function Resolve-PrincipalIdentities
         Write-Verbose "Resolve-PrincipalIdentities: Principal identity cache initialised"
     }
 
-    $resolvedIdentities = @()
+    $resolvedIdentities = [List[object]]::new()
     $emailsToResolve = @()
 
     foreach ($identity in $Identities) {
@@ -61,7 +63,7 @@ function Resolve-PrincipalIdentities
             # Handle email address string
             if ($UseCache -and $script:PrincipalIdentityCache.ContainsKey($identity)) {
                 Write-Verbose "Using cached identity for: $identity"
-                $resolvedIdentities += $script:PrincipalIdentityCache[$identity]
+                $resolvedIdentities.Add($script:PrincipalIdentityCache[$identity])
             } else {
                 $emailsToResolve += $identity
             }
@@ -73,7 +75,7 @@ function Resolve-PrincipalIdentities
                     principalType = $identity.principalType
                     originalIdentity = $identity
                 }
-                $resolvedIdentities += $resolvedIdentity
+                $resolvedIdentities.Add($resolvedIdentity)
                 
                 # Cache structured identities too
                 if ($UseCache) {
@@ -99,7 +101,7 @@ function Resolve-PrincipalIdentities
                 principalType = $resolution.principalType
                 originalIdentity = $resolution.emailAddress
             }
-            $resolvedIdentities += $resolvedIdentity
+            $resolvedIdentities.Add($resolvedIdentity)
             
             # Cache the resolution
             if ($UseCache) {

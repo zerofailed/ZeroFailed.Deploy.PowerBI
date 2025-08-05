@@ -77,13 +77,13 @@ task deployPowerBISharedCloudConnection -After DeployCore {
                 
                 try {
                     $permissionResult = Assert-PBICloudConnectionPermissionGroups `
-                        -CloudConnectionId $connectionResult.id `
-                        -PermissionGroups $connection.permissions `
-                        -AccessToken $token.Token `
-                        -GraphAccessToken $graphToken.Token `
-                        -StrictMode `
-                        -DryRun:$PowerBiDryRunMode `
-                        -ContinueOnError:$PowerBiContinueOnError
+                                            -CloudConnectionId $connectionResult.id `
+                                            -PermissionGroups $connection.permissions `
+                                            -AccessToken $token.Token `
+                                            -GraphAccessToken $graphToken.Token `
+                                            -StrictMode `
+                                            -DryRun:$PowerBiDryRunMode `
+                                            -ContinueOnError:$PowerBiContinueOnError
 
 
                     if ($permissionResult.Success) {
@@ -99,6 +99,7 @@ task deployPowerBISharedCloudConnection -After DeployCore {
                         }
                     }
                 } catch {
+                    Write-Verbose "Exception Stack Trace: $($_.ScriptStackTrace)" -Verbose
                     throw "Failed to manage permissions for connection $($connection.displayName): $($_.Exception.Message)"     
                 }
             } else {

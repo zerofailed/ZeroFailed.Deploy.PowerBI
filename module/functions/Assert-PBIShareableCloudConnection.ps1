@@ -39,16 +39,22 @@ function Assert-PBIShareableCloudConnection
     param (
         [Parameter(Mandatory=$true)]
         [string] $DisplayName,
+
         [Parameter(Mandatory=$true)]
         [string] $ConnectionType,
+
         [Parameter(Mandatory=$true)]
         [hashtable[]] $Parameters,
+
         [Parameter(Mandatory=$true)]
         [guid] $ServicePrincipalClientId,
+
         [Parameter(Mandatory=$true)]
         [securestring] $ServicePrincipalSecret,
+
         [Parameter(Mandatory=$true)]
         [string] $TenantId,
+        
         [Parameter(Mandatory=$true)]
         [securestring] $AccessToken
     )
