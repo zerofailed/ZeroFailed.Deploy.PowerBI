@@ -29,10 +29,10 @@ Describe "_Get-PermissionDelta" {
             $result.ToUpdate | Should -HaveCount 0
             $result.ToRemove | Should -HaveCount 0
             
-            $result.ToAdd[0].principalId | Should -Be "user1"
-            $result.ToAdd[0].role | Should -Be "Owner"
-            $result.ToAdd[1].principalId | Should -Be "user2"
-            $result.ToAdd[1].role | Should -Be "User"
+            $result.ToAdd.principalId | Should -Contain "user1"
+            $result.ToAdd | Where-Object { $_.principalId -eq 'user1' } | Select-Object -ExpandProperty role | Should -Be "Owner"
+            $result.ToAdd.principalId | Should -Contain "user2"
+            $result.ToAdd | Where-Object { $_.principalId -eq 'user2' } | Select-Object -ExpandProperty role | Should -Be "User"
         }
     }
 
