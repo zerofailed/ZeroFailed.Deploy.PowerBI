@@ -150,8 +150,9 @@ function _Get-PermissionDelta
     $currentOwners = $CurrentPermissions | Where-Object { $_.role -eq "Owner" }
     $desiredOwners = $DesiredPermissions | Where-Object { $_.role -eq "Owner" }
     
-    if ($currentOwners.Count -gt 0 -and $desiredOwners.Count -eq 0) {
-        Write-Warning "Warning: No owners specified in desired permissions. This may leave the connection without any owners."
+    if ($currentOwners -and !$desiredOwners) {
+        $toRemove.Clear()
+        Write-Warning "Warning: No owners specified in desired permissions. This may leave the connection without any owners - NO PERMISSIONS WILL BE REMOVED"
     }
 
     # Log summary
