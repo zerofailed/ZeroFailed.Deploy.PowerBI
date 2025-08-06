@@ -13,6 +13,12 @@ task ensurePowerShellYamlModule -Before setupModules {
                 version = '[0.4.7,1.0)'
                 repository = 'PSGallery'
             }
+            'Az.Accounts' = @{
+                repository = 'PSGallery'
+            }
+            'Az.KeyVault' = @{
+                repository = 'PSGallery'
+            }
         }
     }
 }
@@ -37,7 +43,7 @@ task deployPowerBISharedCloudConnection -After DeployCore {
             Write-Build Green "`nProcessing shared cloud connection: $($connection.displayName)"
 
             # Lookup the KV secret based on the available version of the module
-            if ((Get-Module Az.KeyVault | Select-Object -ExpandProperty Version) -ge [Version]'7.3.0') {
+            if ((Get-Module Az.KeyVault | Select-Object -ExpandProperty Version) -ge [Version]'6.3.0') {
                 $secretValue = Get-AzKeyVaultSecret -SecretId $connection.servicePrincipal.secretUrl
             }
             else {
