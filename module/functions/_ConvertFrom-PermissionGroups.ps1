@@ -35,6 +35,8 @@ $resolvedIdentities = @(
 $permissions = _ConvertFrom-PermissionGroups -PermissionGroups $permissionGroups -ResolvedIdentities $resolvedIdentities
 #>
 
+using namespace System.Collections.Generic
+
 function _ConvertFrom-PermissionGroups
 {
     [CmdletBinding()]
@@ -43,10 +45,11 @@ function _ConvertFrom-PermissionGroups
         [hashtable] $PermissionGroups,
         
         [Parameter(Mandatory=$true)]
+        [AllowEmptyCollection()]
         [object[]] $ResolvedIdentities
     )
 
-    $permissions = @()
+    $permissions = [List[object]]::new()
     
     # Create lookup for resolved identities
     $identityLookup = @{}
@@ -85,11 +88,11 @@ function _ConvertFrom-PermissionGroups
 
                 if ($identityLookup.ContainsKey($lookupKey)) {
                     $identity = $identityLookup[$lookupKey]
-                    $permissions += @{
+                    $permissions.Add(@{
                         principalId = $identity.principalId
                         principalType = $identity.principalType
                         role = $role
-                    }
+                    })
                 } else {
                     Write-Warning "Could not find resolved identity for: $lookupKey"
                 }
@@ -98,5 +101,7 @@ function _ConvertFrom-PermissionGroups
     }
 
     Write-Verbose "Converted $($PermissionGroups.Keys.Count) permission groups to $($permissions.Count) individual permissions"
-    return $permissions
+    
+    # Ensure PowerShell doesn't unroll an empty or single item array
+    return ,$permissions
 }

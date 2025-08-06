@@ -47,6 +47,8 @@ $desired = @(
 $delta = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
 #>
 
+using namespace System.Collections.Generic
+
 function _Get-PermissionDelta
 {
     [CmdletBinding()]
@@ -68,9 +70,9 @@ function _Get-PermissionDelta
     Write-Verbose "Strict mode: $StrictMode"
 
     # Initialize result arrays
-    $toAdd = @()
-    $toUpdate = @()
-    $toRemove = @()
+    $toAdd = [List[object]]::new()
+    $toUpdate = [List[object]]::new()
+    $toRemove = [List[object]]::new()
 
     # Create lookup hashtables for efficient comparison
     $currentLookup = @{}
@@ -104,26 +106,26 @@ function _Get-PermissionDelta
             
             if ($current.role -ne $desired.role) {
                 Write-Verbose "Permission update needed: Principal $desiredKey role change from $($current.role) to $($desired.role)"
-                $toUpdate += @{
+                $toUpdate.Add(@{
                     id = $current.id
                     principalId = $desired.principalId
                     principalType = $desired.principalType
                     currentRole = $current.role
                     newRole = $desired.role
                     operation = "Update"
-                }
+                })
             } else {
                 Write-Verbose "Permission already correct: Principal $desiredKey has correct role $($desired.role)"
             }
         } else {
             # Permission doesn't exist, needs to be added
             Write-Verbose "Permission addition needed: Principal $desiredKey role $($desired.role)"
-            $toAdd += @{
+            $toAdd.Add(@{
                 principalId = $desired.principalId
                 principalType = $desired.principalType
                 role = $desired.role
                 operation = "Add"
-            }
+            })
         }
     }
 
@@ -133,13 +135,13 @@ function _Get-PermissionDelta
             if (-not $desiredLookup.ContainsKey($currentKey)) {
                 $current = $currentLookup[$currentKey]
                 Write-Verbose "Permission removal needed: Principal $currentKey with role $($current.role) not in desired state"
-                $toRemove += @{
+                $toRemove.Add(@{
                     id = $current.id
                     principalId = $current.principal.id
                     principalType = $current.principal.type
                     role = $current.role
                     operation = "Remove"
-                }
+                })
             }
         }
     }

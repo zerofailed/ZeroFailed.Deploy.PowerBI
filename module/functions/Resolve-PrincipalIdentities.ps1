@@ -110,6 +110,6 @@ function Resolve-PrincipalIdentities
         }
     }
 
-    return $resolvedIdentities
+    # Ensure PowerShell doesn't unroll an empty or single item array
+    return ,$resolvedIdentities
 }
-
