@@ -6,7 +6,6 @@ Describe "Assert-PBICloudConnectionPermissions" {
 
     BeforeAll {
         # Dot source the function files
-        . $PSScriptRoot/Invoke-RestMethodWithRateLimit.ps1
         . $PSScriptRoot/Assert-PBICloudConnectionPermissions.ps1
     }
 

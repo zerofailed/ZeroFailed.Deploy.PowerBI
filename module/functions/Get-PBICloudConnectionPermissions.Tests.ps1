@@ -6,7 +6,6 @@ Describe "Get-PBICloudConnectionPermissions" {
     
     BeforeAll {
         # Dot source the function files
-        . $PSScriptRoot/Invoke-RestMethodWithRateLimit.ps1
         . $PSScriptRoot/Get-PBICloudConnectionPermissions.ps1
     }
 

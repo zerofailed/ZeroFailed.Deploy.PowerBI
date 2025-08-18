@@ -6,7 +6,6 @@ Describe "Assert-PBIShareableCloudConnection" {
 
     BeforeAll {
         # Dot source the function files
-        . $PSScriptRoot/Invoke-RestMethodWithRateLimit.ps1
         . $PSScriptRoot/Assert-PBIShareableCloudConnection.ps1
         . $PSScriptRoot/_GenerateCreateBody.ps1
         . $PSScriptRoot/_GenerateUpdateBody.ps1

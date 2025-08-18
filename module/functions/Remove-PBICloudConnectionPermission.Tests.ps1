@@ -6,7 +6,6 @@ Describe "Remove-PBICloudConnectionPermission" {
 
     BeforeAll {
         # Dot source the function file
-        . $PSScriptRoot/Invoke-RestMethodWithRateLimit.ps1
         . $PSScriptRoot/Remove-PBICloudConnectionPermission.ps1
 
         Mock Write-Error {}
