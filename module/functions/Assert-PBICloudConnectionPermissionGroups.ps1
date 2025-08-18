@@ -143,8 +143,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to resolve identities: $($_.Exception.Message)"
             $result.Errors += $errorMessage
-            Write-Error $errorMessage
-            throw
+            throw $errorMessage
         }
 
         # Step 3: Convert permission groups to flat permission list
@@ -244,6 +243,7 @@ function Assert-PBICloudConnectionPermissionGroups
                     $result.AfterState = Get-PBICloudConnectionPermissions -CloudConnectionId $CloudConnectionId -AccessToken $AccessToken
                 } catch {
                     Write-Warning "Could not retrieve final permission state: $($_.Exception.Message)"
+                    Write-Verbose "Exception Stack Trace: $($_.ScriptStackTrace)"
                 }
             }
         }

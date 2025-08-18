@@ -70,11 +70,9 @@ function Remove-PBICloudConnectionPermission
                 Write-Warning "Role assignment $RoleAssignmentId not found on cloud connection $CloudConnectionId (may already be removed)"
                 return $null
             } elseif ($statusCode -eq 403) {
-                Write-Error "Insufficient permissions to remove role assignment $RoleAssignmentId from cloud connection $CloudConnectionId"
-                throw
+                throw "Insufficient permissions to remove role assignment $RoleAssignmentId from cloud connection $CloudConnectionId"
             } else {
-                Write-Error "Failed to remove role assignment $RoleAssignmentId from cloud connection $CloudConnectionId`: $errorMessage"
-                throw
+                throw "Failed to remove role assignment $RoleAssignmentId from cloud connection $CloudConnectionId`: [$statusCode] $errorMessage"
             }
         }
     } else {

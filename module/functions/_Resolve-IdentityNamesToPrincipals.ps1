@@ -133,7 +133,7 @@ function _Resolve-IdentityNamesToPrincipals
             Write-Warning "Could not resolve email address: $email"
             
         } catch {
-            Write-Error "Error resolving email address $email`: $_"
+            throw "Error resolving email address $email`: $_"
         }
     }
 

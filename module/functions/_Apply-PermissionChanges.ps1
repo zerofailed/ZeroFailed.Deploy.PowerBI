@@ -79,6 +79,7 @@ function _Apply-PermissionChanges
                     PrincipalId = $add.principalId
                     Role = $add.role
                     Error = $_.Exception.Message
+                    StackTrace = $_.ScriptStackTrace
                 }
                 
                 Write-Error "Failed to add permission for principal $($add.principalId): $($_.Exception.Message)" -ErrorAction Continue
@@ -110,6 +111,7 @@ function _Apply-PermissionChanges
                     CurrentRole = $update.currentRole
                     NewRole = $update.newRole
                     Error = $_.Exception.Message
+                    StackTrace = $_.ScriptStackTrace
                 }
                 Write-Error "Failed to update permission for principal $($update.principalId): $($_.Exception.Message)" -ErrorAction Continue
                 

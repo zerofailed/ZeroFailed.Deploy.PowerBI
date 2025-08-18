@@ -131,6 +131,7 @@ function Remove-PBICloudConnectionPermissionBatch
                 RoleAssignmentId = $assignment.id
                 PrincipalId = $assignment.principalId
                 Error = $_.Exception.Message
+                StackTrace = $_.ScriptStackTrace
             }
             $failures += $failure
             

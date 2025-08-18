@@ -190,6 +190,7 @@ function Resolve-CloudConnections {
     }
     catch {
         Write-Error 'Error whilst processing cloud connection configuration files' -ErrorAction Continue
+        Write-Verbose "Exception Stack Trace: $($_.ScriptStackTrace)"
         throw $_
     }
 }
