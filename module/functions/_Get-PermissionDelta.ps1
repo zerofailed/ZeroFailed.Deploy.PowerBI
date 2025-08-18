@@ -150,9 +150,10 @@ function _Get-PermissionDelta
     $currentOwners = $CurrentPermissions | Where-Object { $_.role -eq "Owner" }
     $desiredOwners = $DesiredPermissions | Where-Object { $_.role -eq "Owner" }
     
-    if ($currentOwners -and !$desiredOwners) {
-        $toRemove.Clear()
-        Write-Warning "Warning: No owners specified in desired permissions. This may leave the connection without any owners - NO PERMISSIONS WILL BE REMOVED"
+    if ($StrictMode -and ($currentOwners -and !$desiredOwners)) {
+        # Anti-lockout protection: Avoid accidents where the automation might remove all owners, leaving the item un-managable.
+        $toRemove = ,($toRemove | Where-Object { $_.role -ne 'Owner' })
+        Write-Warning "Warning: No owners specified in desired permissions. This may leave the connection without any owners - NO OWNER PERMISSIONS WILL BE REMOVED"
     }
 
     # Log summary

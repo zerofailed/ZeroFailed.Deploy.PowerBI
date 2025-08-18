@@ -36,14 +36,16 @@ Describe "_Get-PermissionDelta" {
         }
     }
 
-    Context "When calculating delta with no desired permissions" {
-        It "should mark all current permissions for removal in strict mode" {
+    Context "When calculating delta with no desired non-owner permissions" {
+        It "should mark all current user permissions for removal in strict mode" {
             # Arrange
             $current = @(
                 @{ id = "1"; principal = @{ id = "user1"; type = "User" }; role = "Owner" },
                 @{ id = "2"; principal = @{ id = "user2"; type = "User" }; role = "User" }
             )
-            $desired = @()
+            $desired = @(
+                @{ principalId = "user1"; principalType = "User"; role = "Owner" }  # No change
+            )
 
             # Act
             $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
@@ -51,12 +53,10 @@ Describe "_Get-PermissionDelta" {
             # Assert
             $result.ToAdd | Should -HaveCount 0
             $result.ToUpdate | Should -HaveCount 0
-            $result.ToRemove | Should -HaveCount 2
+            $result.ToRemove | Should -HaveCount 1
             
-            $result.ToRemove[0].principalId | Should -Be "user1"
-            $result.ToRemove[0].id | Should -Be "1"
-            $result.ToRemove[1].principalId | Should -Be "user2"
-            $result.ToRemove[1].id | Should -Be "2"
+            $result.ToRemove[0].principalId | Should -Be "user2"
+            $result.ToRemove[0].id | Should -Be "2"
         }
 
         It "should not mark permissions for removal when strict mode is disabled" {
@@ -193,10 +193,11 @@ Describe "_Get-PermissionDelta" {
     }
 
     Context "When validating owner requirements" {
-        It "should warn when removing all owners" {
+        It "should trigger anti-lockout warning when trying to remove all owners as well as other users" {
             # Arrange
             $current = @(
                 @{ id = "1"; principal = @{ id = "user1"; type = "User" }; role = "Owner" }
+                @{ id = "3"; principal = @{ id = "user3"; type = "User" }; role = "User" }
             )
             $desired = @(
                 @{ principalId = "user2"; principalType = "User"; role = "User" }
@@ -205,9 +206,14 @@ Describe "_Get-PermissionDelta" {
             # Act & Assert
             $result = _Get-PermissionDelta -CurrentPermissions $current -DesiredPermissions $desired -StrictMode
             
-            # Should still process the change but issue a warning
+            # Should partially process the change but not remove any existing Owner role assignments
             $result.ToAdd | Should -HaveCount 1
             $result.ToRemove | Should -HaveCount 1
+            $result.ToRemove[0].principalId | Should -Be "user3"
+            $result.ToRemove[0].id | Should -Be "3"
+
+            # Should log warning about anti-lockout protection
+            Should -Invoke Write-Warning -ParameterFilter { $Message -like "Warning: No owners specified in desired permissions*" }
         }
     }
 }
