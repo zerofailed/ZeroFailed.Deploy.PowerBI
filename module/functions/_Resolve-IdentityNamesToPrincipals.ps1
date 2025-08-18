@@ -52,7 +52,12 @@ function _Resolve-IdentityNamesToPrincipals
             }
 
             try {
-                $user = Invoke-RestMethod -Uri $userUri -Headers $headers -Method GET
+                $splat = @{
+                    Uri = $userUri
+                    Headers = $headers
+                    Method = "GET"
+                }
+                $user = Invoke-RestMethodWithRateLimit -Splat $splat
                 $resolvedPrincipals += @{
                     emailAddress = $email
                     principalId = $user.id
@@ -72,7 +77,12 @@ function _Resolve-IdentityNamesToPrincipals
             $groupUri = "https://graph.microsoft.com/v1.0/groups?`$filter=displayName eq '$email'"
             
             try {
-                $groupResponse = Invoke-RestMethod -Uri $groupUri -Headers $headers -Method GET
+                $splat = @{
+                    Uri = $groupUri
+                    Headers = $headers
+                    Method = "GET"
+                }
+                $groupResponse = Invoke-RestMethodWithRateLimit -Splat $splat
                 if ($groupResponse.value -and $groupResponse.value.Count -gt 0) {
                     $group = $groupResponse.value[0]
                     $resolvedPrincipals += @{
@@ -95,7 +105,12 @@ function _Resolve-IdentityNamesToPrincipals
             $spUri = "https://graph.microsoft.com/v1.0/servicePrincipals?`$filter=displayName eq '$email'"
             
             try {
-                $spResponse = Invoke-RestMethod -Uri $spUri -Headers $headers -Method GET
+                $splat = @{
+                    Uri = $spUri
+                    Headers = $headers
+                    Method = "GET"
+                }
+                $spResponse = Invoke-RestMethodWithRateLimit -Splat $splat
                 if ($spResponse.value -and $spResponse.value.Count -gt 0) {
                     $sp = $spResponse.value[0]
                     $resolvedPrincipals += @{

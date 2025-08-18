@@ -6,14 +6,15 @@ Describe "Assert-PBICloudConnectionPermissions" {
 
     BeforeAll {
         # Dot source the function files
+        . $PSScriptRoot/Invoke-RestMethodWithRateLimit.ps1
         . $PSScriptRoot/Assert-PBICloudConnectionPermissions.ps1
     }
 
     Context "When an existing permission is found" {
         It "should not update when the role is the same" {
             # Arrange: mock GET to return an existing permission with same role
-            Mock -CommandName Invoke-RestMethod -MockWith {
-                if ($Method -eq "GET") {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
                     return @{
                         value = @(
                             @{
@@ -38,14 +39,14 @@ Describe "Assert-PBICloudConnectionPermissions" {
                 -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)
 
             # Assert
-            Assert-MockCalled -CommandName Invoke-RestMethod -ParameterFilter { $Method -eq "GET" } -Times 1
-            Assert-MockCalled -CommandName Invoke-RestMethod -ParameterFilter { $Method -eq "PATCH" } -Times 0
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "GET" } -Times 1
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "PATCH" } -Times 0
         }
 
         It "should update the permission when the role is different" {
             # Arrange: mock GET to return existing permission with different role and PATCH to return updated
-            Mock -CommandName Invoke-RestMethod -MockWith {
-                if ($Method -eq "GET") {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
                     return @{
                         value = @(
                             @{
@@ -58,7 +59,7 @@ Describe "Assert-PBICloudConnectionPermissions" {
                             }
                         )
                     }
-                } elseif ($Method -eq "PATCH") {
+                } elseif ($Splat.Method -eq "PATCH") {
                     return "updated"
                 }
             }
@@ -73,10 +74,10 @@ Describe "Assert-PBICloudConnectionPermissions" {
 
             # Assert
             $result | Should -Be "updated"
-            Assert-MockCalled -CommandName Invoke-RestMethod -ParameterFilter { $Method -eq "GET" } -Times 1
-            Assert-MockCalled -CommandName Invoke-RestMethod -ParameterFilter { 
-                $Method -eq "PATCH" -and
-                $Body -like '*"role":"Owner"*'
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "GET" } -Times 1
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { 
+                $Splat.Method -eq "PATCH" -and
+                $Splat.Body -like '*"role":"Owner"*'
             } -Times 1
         }
     }
@@ -84,10 +85,10 @@ Describe "Assert-PBICloudConnectionPermissions" {
     Context "When no existing permission is found" {
         It "should create new permission via POST" {
             # Arrange: mock GET to return no permissions and POST to return created
-            Mock -CommandName Invoke-RestMethod -MockWith {
-                if ($Method -eq "GET") {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
                     return @{ value = @() }
-                } elseif ($Method -eq "POST") {
+                } elseif ($Splat.Method -eq "POST") {
                     return "created"
                 }
             }
@@ -102,10 +103,10 @@ Describe "Assert-PBICloudConnectionPermissions" {
 
             # Assert
             $result | Should -Be "created"
-            Assert-MockCalled -CommandName Invoke-RestMethod -ParameterFilter { $Method -eq "GET" } -Times 1
-            Assert-MockCalled -CommandName Invoke-RestMethod -ParameterFilter { 
-                $Method -eq "POST" -and
-                $Body -like '*"type":"ServicePrincipal"*'
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "GET" } -Times 1
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { 
+                $Splat.Method -eq "POST" -and
+                $Splat.Body -like '*"type":"ServicePrincipal"*'
             } -Times 1
         }
     }

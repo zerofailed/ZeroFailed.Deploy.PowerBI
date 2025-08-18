@@ -22,6 +22,12 @@ Secure string containing the access token for the Power BI Fabric API.
 .PARAMETER ContinueOnError
 Switch to continue processing remaining removals even if some fail.
 
+.PARAMETER DelayBetweenRequestsMs
+Optional delay in milliseconds between individual API requests to prevent rate limiting.
+
+.PARAMETER BatchSize
+Optional batch size for processing requests. When specified, introduces a pause between batches.
+
 .OUTPUTS
 Returns a hashtable with success and failure counts, plus details of any failures.
 
@@ -36,6 +42,15 @@ $result = Remove-PBICloudConnectionPermissionBatch `
     -RoleAssignments $assignmentsToRemove `
     -AccessToken $token.Token `
     -ContinueOnError
+
+.EXAMPLE
+# With throttling to prevent rate limits
+$result = Remove-PBICloudConnectionPermissionBatch `
+    -CloudConnectionId "connection-id" `
+    -RoleAssignments $assignmentsToRemove `
+    -AccessToken $token.Token `
+    -DelayBetweenRequestsMs 500 `
+    -BatchSize 10
 #>
 function Remove-PBICloudConnectionPermissionBatch
 {
@@ -52,14 +67,29 @@ function Remove-PBICloudConnectionPermissionBatch
         [securestring] $AccessToken,
         
         [Parameter()]
-        [switch] $ContinueOnError
+        [switch] $ContinueOnError,
+        
+        [Parameter()]
+        [int] $DelayBetweenRequestsMs = 0,
+        
+        [Parameter()]
+        [int] $BatchSize = 0
     )
 
     Write-Information "Removing $($RoleAssignments.Count) role assignments from cloud connection $CloudConnectionId"
+    
+    if ($DelayBetweenRequestsMs -gt 0) {
+        Write-Information "Using throttling: $DelayBetweenRequestsMs ms delay between requests"
+    }
+    
+    if ($BatchSize -gt 0) {
+        Write-Information "Processing in batches of $BatchSize assignments"
+    }
 
     $successCount = 0
     $failureCount = 0
     $failures = @()
+    $requestCount = 0
 
     foreach ($assignment in $RoleAssignments) {
         try {
@@ -80,7 +110,20 @@ function Remove-PBICloudConnectionPermissionBatch
             }
 
             $successCount++
+            $requestCount++
             Write-Verbose "Successfully removed role assignment $($assignment.id)"
+            
+            # Apply throttling if configured
+            if ($DelayBetweenRequestsMs -gt 0 -and $requestCount -lt $RoleAssignments.Count) {
+                Write-Verbose "Applying throttling delay: $DelayBetweenRequestsMs ms"
+                Start-Sleep -Milliseconds $DelayBetweenRequestsMs
+            }
+            
+            # Apply batch processing pause if configured  
+            if ($BatchSize -gt 0 -and ($requestCount % $BatchSize) -eq 0 -and $requestCount -lt $RoleAssignments.Count) {
+                Write-Information "Processed batch of $BatchSize requests. Brief pause before next batch..."
+                Start-Sleep -Seconds 2
+            }
 
         } catch {
             $failureCount++

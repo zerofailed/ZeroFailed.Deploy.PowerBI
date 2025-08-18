@@ -6,6 +6,7 @@ Describe "Remove-PBICloudConnectionPermission" {
 
     BeforeAll {
         # Dot source the function file
+        . $PSScriptRoot/Invoke-RestMethodWithRateLimit.ps1
         . $PSScriptRoot/Remove-PBICloudConnectionPermission.ps1
 
         Mock Write-Error {}
@@ -19,7 +20,7 @@ Describe "Remove-PBICloudConnectionPermission" {
             $roleAssignmentId = "test-assignment-id"
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName Invoke-RestMethod -MockWith {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
                 return "Success"
             }
 
@@ -30,10 +31,10 @@ Describe "Remove-PBICloudConnectionPermission" {
                 -AccessToken $mockToken
 
             # Assert
-            Assert-MockCalled -CommandName Invoke-RestMethod -ParameterFilter {
-                $Uri -eq "https://api.fabric.microsoft.com/v1/connections/$cloudConnectionId/roleAssignments/$roleAssignmentId" -and
-                $Method -eq "DELETE" -and
-                $Headers.Authorization -eq "Bearer mock-token"
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter {
+                $Splat.Uri -eq "https://api.fabric.microsoft.com/v1/connections/$cloudConnectionId/roleAssignments/$roleAssignmentId" -and
+                $Splat.Method -eq "DELETE" -and
+                $Splat.Headers.Authorization -eq "Bearer mock-token"
             } -Times 1
 
             $result | Should -Be "Success"
@@ -47,7 +48,7 @@ Describe "Remove-PBICloudConnectionPermission" {
             $roleAssignmentId = "non-existent-assignment-id"
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName Invoke-RestMethod -MockWith {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
                 # Create a proper WebException with 404 status
                 $response = [System.Net.HttpWebResponse]::new()
                 $response | Add-Member -MemberType NoteProperty -Name StatusCode -Value ([System.Net.HttpStatusCode]::NotFound) -Force
@@ -74,7 +75,7 @@ Describe "Remove-PBICloudConnectionPermission" {
             $roleAssignmentId = "test-assignment-id"
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName Invoke-RestMethod -MockWith {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
                 $exception = [System.Net.WebException]::new("Forbidden")
                 $exception | Add-Member -MemberType NoteProperty -Name Response -Value @{ StatusCode = @{ value__ = 403 } } -Force
                 throw $exception
@@ -95,7 +96,7 @@ Describe "Remove-PBICloudConnectionPermission" {
             $roleAssignmentId = "test-assignment-id"
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName Invoke-RestMethod
+            Mock -CommandName Invoke-RestMethodWithRateLimit
 
             # Act
             $result = Remove-PBICloudConnectionPermission `
@@ -105,7 +106,7 @@ Describe "Remove-PBICloudConnectionPermission" {
                 -WhatIf
 
             # Assert
-            Assert-MockCalled -CommandName Invoke-RestMethod -Times 0
+            Should -Invoke Invoke-RestMethodWithRateLimit -Times 0
             $result | Should -BeNullOrEmpty
         }
     }
@@ -117,7 +118,7 @@ Describe "Remove-PBICloudConnectionPermission" {
             $roleAssignmentId = "test-assignment-id"
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
 
-            Mock -CommandName Invoke-RestMethod -MockWith {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
                 $exception = [System.Net.WebException]::new("Internal Server Error")
                 $exception | Add-Member -MemberType NoteProperty -Name Response -Value @{ StatusCode = @{ value__ = 500 } } -Force
                 throw $exception
