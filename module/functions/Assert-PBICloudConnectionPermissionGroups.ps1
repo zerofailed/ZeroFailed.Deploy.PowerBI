@@ -253,6 +253,7 @@ function Assert-PBICloudConnectionPermissionGroups
     } catch {
         $result.Success = $false
         $result.Errors += "Operation failed: $($_.Exception.Message)"
+        Write-Verbose $_.ScriptStackTrace
         throw "Permission group synchronization failed: $($_.Exception.Message)"     
     }
 

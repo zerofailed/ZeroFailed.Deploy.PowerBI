@@ -131,12 +131,11 @@ function Remove-PBICloudConnectionPermissionBatch
                 RoleAssignmentId = $assignment.id
                 PrincipalId = $assignment.principalId
                 Error = $_.Exception.Message
-                StackTrace = $_.ScriptStackTrace
             }
             $failures += $failure
             
             Write-Error "Failed to remove role assignment $($assignment.id): $($_.Exception.Message)" -ErrorAction Continue
-            
+            Write-Verbose $_.ScriptStackTrace
             if (-not $ContinueOnError) {
                 throw "Stopping batch removal due to error and ContinueOnError is false"
             }
