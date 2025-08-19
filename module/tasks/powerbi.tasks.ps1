@@ -107,7 +107,10 @@ task deployPowerBISharedCloudConnection -After DeployCore {
                             }
                         }
                     } catch {
-                        Write-Verbose "Exception Stack Trace: $($_.ScriptStackTrace)" -Verbose
+                        if (!$_.Exception.WasThrownFromThrowStatement) {
+                            # Only log the stack trace for any unhandled exceptions, as we assume thrown exceptions will have done this already
+                            Write-Verbose "Exception Stack Trace: $($_.ScriptStackTrace)" -Verbose
+                        }
                         throw "Failed to manage permissions for connection $($connection.displayName): $($_.Exception.Message)"     
                     }
                 } else {

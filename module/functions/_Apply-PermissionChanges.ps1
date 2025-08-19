@@ -82,7 +82,7 @@ function _Apply-PermissionChanges
                 }
                 
                 Write-Error "Failed to add permission for principal $($add.principalId): $($_.Exception.Message)" -ErrorAction Continue
-                Write-Verbose $_.ScriptStackTrace
+                Write-Verbose $_.ScriptStackTrace -Verbose
                 if (-not $ContinueOnError) {
                     throw "Stopping 'apply additions' due to error and ContinueOnError is false"
                 }
@@ -113,7 +113,7 @@ function _Apply-PermissionChanges
                     Error = $_.Exception.Message
                 }
                 Write-Error "Failed to update permission for principal $($update.principalId): $($_.Exception.Message)" -ErrorAction Continue
-                Write-Verbose $_.ScriptStackTrace
+                Write-Verbose $_.ScriptStackTrace -Verbose
                 if (-not $ContinueOnError) {
                     throw "Stopping 'apply updates' due to error and ContinueOnError is false"
                 }

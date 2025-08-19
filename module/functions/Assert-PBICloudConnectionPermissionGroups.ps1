@@ -39,7 +39,7 @@ in the configuration will be removed.
 Switch to perform a dry run without making any actual changes. Useful for testing and validation.
 
 .PARAMETER ContinueOnError
-Switch to continue processing even if some operations fail.
+Switch to continue applying permission changes even if some operations fail. NOTE: Failures during pre-requisite operations will still terminate processing (e.g. resolving Entra identities)
 
 .OUTPUTS
 Returns a detailed result object containing:
@@ -143,6 +143,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to resolve identities: $($_.Exception.Message)"
             $result.Errors += $errorMessage
+            Write-Verbose $_.ScriptStackTrace -Verbose
             throw $errorMessage
         }
 
@@ -155,6 +156,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to convert permission groups: $($_.Exception.Message)"
             $result.Errors += $errorMessage
+            Write-Verbose $_.ScriptStackTrace -Verbose
             throw $errorMessage         
         }
 
@@ -171,6 +173,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to retrieve current permissions: $($_.Exception.Message)"
             $result.Errors += $errorMessage
+            Write-Verbose $_.ScriptStackTrace -Verbose
             throw $errorMessage            
         }
 
@@ -189,6 +192,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to calculate permission delta: $($_.Exception.Message)"
             $result.Errors += $errorMessage
+            Write-Verbose $_.ScriptStackTrace -Verbose
             throw $errorMessage         
         }
 
@@ -248,12 +252,19 @@ function Assert-PBICloudConnectionPermissionGroups
             }
         }
 
-        Write-Information "Permission group synchronization completed successfully"
-        
+        if ($result.Success -and $result.Errors.Count -eq 0) {
+            Write-Information "Permission group synchronization completed successfully"
+        }
+        elseif ($result.Success) {
+            Write-Information "Permission group synchronization completed with errors"
+        }        
     } catch {
         $result.Success = $false
         $result.Errors += "Operation failed: $($_.Exception.Message)"
-        Write-Verbose $_.ScriptStackTrace
+        if (!$_.Exception.WasThrownFromThrowStatement) {
+            # Only log the stack trace for any unhandled exceptions, as we assume thrown exceptions will have done this already
+            Write-Verbose $_.ScriptStackTrace -Verbose
+        }
         throw "Permission group synchronization failed: $($_.Exception.Message)"     
     }
 
