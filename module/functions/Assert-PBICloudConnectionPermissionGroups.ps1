@@ -143,7 +143,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to resolve identities: $($_.Exception.Message)"
             $result.Errors += $errorMessage
-            Write-Verbose $_.ScriptStackTrace -Verbose
+            Write-Verbose ($_.ScriptStackTrace -split [environment]::NewLine | Select -First 1) -Verbose
             throw $errorMessage
         }
 
@@ -156,7 +156,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to convert permission groups: $($_.Exception.Message)"
             $result.Errors += $errorMessage
-            Write-Verbose $_.ScriptStackTrace -Verbose
+            Write-Verbose ($_.ScriptStackTrace -split [environment]::NewLine | Select -First 1) -Verbose
             throw $errorMessage         
         }
 
@@ -173,7 +173,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to retrieve current permissions: $($_.Exception.Message)"
             $result.Errors += $errorMessage
-            Write-Verbose $_.ScriptStackTrace -Verbose
+            Write-Verbose ($_.ScriptStackTrace -split [environment]::NewLine | Select -First 1) -Verbose
             throw $errorMessage            
         }
 
@@ -192,7 +192,7 @@ function Assert-PBICloudConnectionPermissionGroups
         } catch {
             $errorMessage = "Failed to calculate permission delta: $($_.Exception.Message)"
             $result.Errors += $errorMessage
-            Write-Verbose $_.ScriptStackTrace -Verbose
+            Write-Verbose ($_.ScriptStackTrace -split [environment]::NewLine | Select -First 1) -Verbose
             throw $errorMessage         
         }
 
@@ -263,7 +263,7 @@ function Assert-PBICloudConnectionPermissionGroups
         $result.Errors += "Operation failed: $($_.Exception.Message)"
         if (!$_.Exception.WasThrownFromThrowStatement) {
             # Only log the stack trace for any unhandled exceptions, as we assume thrown exceptions will have done this already
-            Write-Verbose $_.ScriptStackTrace -Verbose
+            Write-Verbose ($_.ScriptStackTrace -split [environment]::NewLine | Select -First 1) -Verbose
         }
         throw "Permission group synchronization failed: $($_.Exception.Message)"     
     }
