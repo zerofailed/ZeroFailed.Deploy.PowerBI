@@ -69,7 +69,7 @@ function Assert-PBIShareableCloudConnection
     }
 
     try {
-        $existingConnection = Invoke-RestMethodWithRateLimit -Splat $splat | Select-Object -ExpandProperty value | Where-Object {$_.displayName -eq $DisplayName}
+        $existingConnection = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue | Select-Object -ExpandProperty value | Where-Object {$_.displayName -eq $DisplayName}
 
         if ($existingConnection) {
             Write-Information "Power BI shared cloud connection $DisplayName already exists"
@@ -85,7 +85,7 @@ function Assert-PBIShareableCloudConnection
                 "Headers" = @{Authorization = "Bearer $($AccessToken | ConvertFrom-SecureString -AsPlainText)"; 'Content-type' = 'application/json'}
                 "Body" = $updateBody | ConvertTo-Json -Compress -Depth 100
             }
-            $response = Invoke-RestMethodWithRateLimit -Splat $splat
+            $response = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
         } else {
             Write-Information "Connection does not exist"
             Write-Information "Creating Power BI shared cloud connection $DisplayName"
@@ -104,7 +104,7 @@ function Assert-PBIShareableCloudConnection
                 "Headers" = @{Authorization = "Bearer $($AccessToken | ConvertFrom-SecureString -AsPlainText)"; 'Content-type' = 'application/json'}
                 "Body" = $createBody | ConvertTo-Json -Compress -Depth 100
             }
-            $response = Invoke-RestMethodWithRateLimit -Splat $splat
+            $response = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
         }
     }
     catch {

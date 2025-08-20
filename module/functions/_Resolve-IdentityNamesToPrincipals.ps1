@@ -57,7 +57,7 @@ function _Resolve-IdentityNamesToPrincipals
                     Headers = $headers
                     Method = "GET"
                 }
-                $user = Invoke-RestMethodWithRateLimit -Splat $splat
+                $user = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
                 $resolvedPrincipals += @{
                     emailAddress = $email
                     principalId = $user.id
@@ -82,7 +82,7 @@ function _Resolve-IdentityNamesToPrincipals
                     Headers = $headers
                     Method = "GET"
                 }
-                $groupResponse = Invoke-RestMethodWithRateLimit -Splat $splat
+                $groupResponse = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
                 if ($groupResponse.value -and $groupResponse.value.Count -gt 0) {
                     $group = $groupResponse.value[0]
                     $resolvedPrincipals += @{
@@ -110,7 +110,7 @@ function _Resolve-IdentityNamesToPrincipals
                     Headers = $headers
                     Method = "GET"
                 }
-                $spResponse = Invoke-RestMethodWithRateLimit -Splat $splat
+                $spResponse = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
                 if ($spResponse.value -and $spResponse.value.Count -gt 0) {
                     $sp = $spResponse.value[0]
                     $resolvedPrincipals += @{

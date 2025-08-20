@@ -61,7 +61,7 @@ function Assert-PBICloudConnectionPermissions
         "Headers" = @{Authorization = "Bearer $($AccessToken | ConvertFrom-SecureString -AsPlainText)"; 'Content-type' = 'application/json'}
     }
 
-    $existingPermissions = Invoke-RestMethodWithRateLimit -Splat $splat | Select-Object -ExpandProperty value | Where-Object {$_.principal.id -eq $AssigneePrincipalId}
+    $existingPermissions = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue | Select-Object -ExpandProperty value | Where-Object {$_.principal.id -eq $AssigneePrincipalId}
 
     if ($existingPermissions) {
         Write-Information "Role assignment for $AssigneePrincipalId for the Power BI shared cloud connection $CloudConnectionId already exists"
@@ -86,7 +86,7 @@ function Assert-PBICloudConnectionPermissions
                 "Body" = $updateBody | ConvertTo-Json -Compress -Depth 100
             }
 
-            $response = Invoke-RestMethodWithRateLimit -Splat $splat            
+            $response = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
         }
     } else {
         Write-Information "Role assignment for $AssigneePrincipalId for the Power BI shared cloud connection $CloudConnectionId does not exist"
@@ -106,7 +106,7 @@ function Assert-PBICloudConnectionPermissions
             "Headers" = @{Authorization = "Bearer $($AccessToken | ConvertFrom-SecureString -AsPlainText)"; 'Content-type' = 'application/json'}
             "Body" = $createBody | ConvertTo-Json -Compress -Depth 100
         }
-        $response = Invoke-RestMethodWithRateLimit -Splat $splat
+        $response = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
     }
 
     return $response

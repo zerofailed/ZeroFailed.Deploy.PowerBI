@@ -57,7 +57,7 @@ function Remove-PBICloudConnectionPermission
                 }
             }
 
-            $response = Invoke-RestMethodWithRateLimit -Splat $splat
+            $response = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
             Write-Information "Successfully removed role assignment $RoleAssignmentId from cloud connection $CloudConnectionId"
             return $response
 

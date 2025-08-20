@@ -47,7 +47,7 @@ function Get-PBICloudConnectionPermissions
     }
 
     try {
-        $response = Invoke-RestMethodWithRateLimit -Splat $splat
+        $response = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
         return $response.value
     } catch {
         throw "Failed to retrieve permissions for cloud connection $CloudConnectionId`: $($_.Exception.Message)"
