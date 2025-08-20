@@ -69,7 +69,7 @@ function _Apply-PermissionChanges
                     -AssigneePrincipalId $add.principalId `
                     -AssigneePrincipalRole $add.role `
                     -AssigneePrincipalType $add.principalType `
-                    -AccessToken $AccessToken
+                    -AccessToken $AccessToken | Out-Null
                 
                 $changeResults.AddResults.SuccessCount++
                 Write-Verbose "Successfully added permission for principal $($add.principalId) with role $($add.role)"
@@ -100,7 +100,7 @@ function _Apply-PermissionChanges
                     -AssigneePrincipalId $update.principalId `
                     -AssigneePrincipalRole $update.newRole `
                     -AssigneePrincipalType $update.principalType `
-                    -AccessToken $AccessToken
+                    -AccessToken $AccessToken | Out-Null
                 
                 $changeResults.UpdateResults.SuccessCount++
                 Write-Verbose "Successfully updated permission for principal $($update.principalId) from $($update.currentRole) to $($update.newRole)"
