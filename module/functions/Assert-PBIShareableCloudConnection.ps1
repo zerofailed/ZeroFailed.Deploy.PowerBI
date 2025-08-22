@@ -108,7 +108,7 @@ function Assert-PBIShareableCloudConnection
         }
     }
     catch {
-        Write-Error "Failed to process cloud connection '$DisplayName': $($_.Exception.Message)" -ErrorAction Continue         
+        Write-ErrorLogMessage "Failed to process cloud connection '$DisplayName': $($_.Exception.Message)"
         if (-not $ContinueOnError) {
             throw "Stopping processing cloud connections due to error and ContinueOnError is false"
         }

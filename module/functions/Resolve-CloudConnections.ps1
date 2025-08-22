@@ -189,7 +189,7 @@ function Resolve-CloudConnections {
         return $denormalizedConnections
     }
     catch {
-        Write-Error 'Error whilst processing cloud connection configuration files' -ErrorAction Continue
+        Write-ErrorLogMessage 'Error whilst processing cloud connection configuration files'
         Write-Verbose "Exception Stack Trace: $($_.ScriptStackTrace)"
         throw $_
     }
