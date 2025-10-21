@@ -143,15 +143,18 @@ function Resolve-CloudConnections {
             # Resolve connection target
             if ($conn.target.useTarget) {
                 $target = _Resolve-ConnectionTarget -ConnectionTargets $connectionTargets -Reference $conn.target.useTarget
-                $denormalized.target = $target
+                # Clone the target configuration to ensure a new instance, so any the parameter
+                # overrides are unique to this connection and not updating the default target object
+                $denormalized.target = $target.Clone()
+
                 # Override connection target properties (e.g. the database name on a SQL connection)
                 if ($conn.target.ContainsKey('parameters')) {
                     # TODO: Extract this logic to private function
                     
-                    # Convert target array to hashtable for O(1) lookup and direct manipulation
+                    # Convert target array to hashtable for more efficient lookup and direct manipulation
                     $targetParams = @{}
                     foreach ($param in $denormalized.target) {
-                        $targetParams[$param.name] = $param
+                        $targetParams[$param.name] = $param.Clone()
                     }
                     
                     # Process parameter overrides with direct hashtable operations
