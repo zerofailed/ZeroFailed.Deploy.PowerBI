@@ -29,7 +29,7 @@ Describe 'Resolve-CloudConnections' {
 
         It 'Should return denormalized connections' {
             # Verify number of connections
-            $results.Count | Should -Be 6
+            $results.Count | Should -Be 7
 
             # Verify development connection properties
             $devConnection = $results | Where-Object { $_.displayName -eq 'Development Blob Storage' }
@@ -47,13 +47,23 @@ Describe 'Resolve-CloudConnections' {
         }
 
         It "Should apply connection target property overrides specified on the cloud connection definition" {
-            $sqlConnection = $results | Where-Object { $_.displayName -eq 'Development SQL Database' }
+            $sqlConnection = $results | Where-Object { $_.displayName -eq 'Development SQL Database1' }
             $sqlConnection | Should -Not -BeNullOrEmpty
             $sqlConnection.type | Should -Be 'SQL'
             $sqlConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
             $sqlConnection.servicePrincipal.tenantId | Should -Be '00000000-0000-0000-0000-000000000001'
             $sqlConnection.target | Where-Object { $_.name -eq 'server' } | Select-Object -ExpandProperty value | Should -Be 'devsql.database.windows.net'
-            $sqlConnection.target | Where-Object { $_.name -eq 'database' } | Select-Object -ExpandProperty value | Should -Be 'overridden'
+            $sqlConnection.target | Where-Object { $_.name -eq 'database' } | Select-Object -ExpandProperty value | Should -Be 'db1'
+        }
+
+        It "Should correctly handle distinct connection target property overrides across multiple cloud connection definitions" {
+            $sqlConnection = $results | Where-Object { $_.displayName -eq 'Development SQL Database2' }
+            $sqlConnection | Should -Not -BeNullOrEmpty
+            $sqlConnection.type | Should -Be 'SQL'
+            $sqlConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
+            $sqlConnection.servicePrincipal.tenantId | Should -Be '00000000-0000-0000-0000-000000000001'
+            $sqlConnection.target | Where-Object { $_.name -eq 'server' } | Select-Object -ExpandProperty value | Should -Be 'devsql.database.windows.net'
+            $sqlConnection.target | Where-Object { $_.name -eq 'database' } | Select-Object -ExpandProperty value | Should -Be 'db2'
         }
 
         It "Should apply the default tenant ID when a service principal does not define its own" {

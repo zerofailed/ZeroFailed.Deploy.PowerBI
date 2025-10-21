@@ -18,14 +18,33 @@ cloudConnections:
       reshareUsers: []
 
   # Development SQL using shared service principal and target
-  - displayName: Development SQL Database
+  - displayName: Development SQL Database1
     type: SQL
     useServicePrincipal: development
     target:
       useTarget: sqlServer.dev
       parameters:
         - name: database
-          value: overridden
+          value: db1
+    permissions:
+      owners:
+        - jessica.hill@endjin.com
+      users:
+        - dev.team@endjin.com
+        - principalId: "282de1ed-2c46-4b5b-ac1d-06bcf3b19128"
+          principalType: "Group"
+      reshareUsers:
+        - power.users@endjin.com
+
+  # Development SQL using shared service principal and target
+  - displayName: Development SQL Database2
+    type: SQL
+    useServicePrincipal: development
+    target:
+      useTarget: sqlServer.dev
+      parameters:
+        - name: database
+          value: db2
     permissions:
       owners:
         - jessica.hill@endjin.com
