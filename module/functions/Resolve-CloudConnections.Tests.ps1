@@ -77,7 +77,7 @@ Describe 'Resolve-CloudConnections' {
     Context 'When given a partial configuration path' {
         It 'Should try using a default-named configuration file' {
             $results = Resolve-CloudConnections -ConfigPath $testDataDir
-            $results.Count | Should -Be 6
+            $results.Count | Should -Be 7
         }
     }
 
@@ -92,9 +92,10 @@ Describe 'Resolve-CloudConnections' {
     Context 'When filtering connections' {
         It 'Should correctly filter for a single pattern' {
             $connections = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter "Development*"
-            $connections.Count | Should -Be 2
+            $connections.Count | Should -Be 3
             $connections[0].displayName | Should -Be "Development Blob Storage"
-            $connections[1].displayName | Should -Be "Development SQL Database"
+            $connections[1].displayName | Should -Be "Development SQL Database1"
+            $connections[2].displayName | Should -Be "Development SQL Database2"
         }
 
         It 'Should correctly filter for multiple patterns' {
@@ -107,7 +108,7 @@ Describe 'Resolve-CloudConnections' {
 
         It 'Should process all connections when no filter is provided' {
             $connections = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml"
-            $connections.Count | Should -Be 6
+            $connections.Count | Should -Be 7
         }
 
         It 'Should log a warning when no connections match the filter' {
