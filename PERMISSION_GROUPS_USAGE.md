@@ -223,6 +223,6 @@ The system includes built-in rate limiting awareness:
 ## Examples
 
 See the test configuration files for additional examples:
-- `module/functions/test-data/connections/development.yaml`
-- `module/functions/test-data/connections/testing.yaml`
-- `module/functions/test-data/connections/special-purpose.yaml`
+- `module/_functions/_test-data/connections/development.yaml`
+- `module/_functions/_test-data/connections/testing.yaml`
+- `module/_functions/_test-data/connections/special-purpose.yaml`

@@ -6,7 +6,7 @@ Describe 'Resolve-CloudConnections' {
     BeforeAll {
         # Dot source the function files
         . $PSScriptRoot/Resolve-CloudConnections.ps1
-        $testDataDir = Join-Path $PSScriptRoot 'test-data'
+        $testDataDir = Join-Path $PSScriptRoot '..' '_test-data'
     
         # load required internal dependencies
         . (Join-Path $PSScriptRoot 'Get-YamlContent.ps1')

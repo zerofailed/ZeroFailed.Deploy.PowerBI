@@ -7,7 +7,7 @@ Describe 'Get-YamlContent' {
         # Dot source the function files
         . $PSScriptRoot/Get-YamlContent.ps1
 
-        $testDataDir = Join-Path $PSScriptRoot 'test-data'
+        $testDataDir = Join-Path $PSScriptRoot '..' '_test-data'
     }
 
     Context 'When loading valid YAML files' {
