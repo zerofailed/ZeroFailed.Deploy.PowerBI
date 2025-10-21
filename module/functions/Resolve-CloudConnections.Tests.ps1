@@ -13,7 +13,13 @@ Describe 'Resolve-CloudConnections' {
         . (Join-Path $PSScriptRoot '_Resolve-ServicePrincipal.ps1')
         . (Join-Path $PSScriptRoot '_Resolve-ConnectionTarget.ps1')
 
+        # Make external functions available for mocking
+        function Write-ErrorLogMessage { param($Message) }
+        function Invoke-RestMethodWithRateLimit {}
+
         Mock Write-Information {}
+        Mock Write-ErrorLogMessage {}
+        Mock Invoke-RestMethodWithRateLimit {}
     }
 
     Context 'When processing all configuration files' {
@@ -69,7 +75,7 @@ Describe 'Resolve-CloudConnections' {
         It 'Should throw on invalid config path' {
             Mock Write-Error {}
             { Resolve-CloudConnections -ConfigPath 'nonexistent/config.yaml' } | Should -Throw
-            Should -Invoke Write-Error -Exactly 1 -ParameterFilter { $Message -eq 'Error whilst processing cloud connection configuration files' }
+            Should -Invoke Write-ErrorLogMessage -Exactly 1 -ParameterFilter { $Message -eq 'Error whilst processing cloud connection configuration files' }
         }
     }
 

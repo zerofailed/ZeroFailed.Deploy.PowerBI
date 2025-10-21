@@ -16,8 +16,12 @@ Describe "Assert-PBICloudConnectionPermissionGroups" {
         . $PSScriptRoot/_Apply-PermissionChanges.ps1
         . $PSScriptRoot/Remove-PBICloudConnectionPermissionBatch.ps1
 
+        # Make external functions available for mocking
+        function Write-ErrorLogMessage { param($Message) }
+
         Mock Write-Error {}
         Mock Write-Warning {}
+        Mock Write-ErrorLogMessage {}
     }
 
     Context "When all operations succeed" {

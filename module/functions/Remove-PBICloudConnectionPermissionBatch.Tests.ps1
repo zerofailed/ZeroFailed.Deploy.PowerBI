@@ -9,6 +9,9 @@ Describe "Remove-PBICloudConnectionPermissionBatch" {
         . $PSScriptRoot/Remove-PBICloudConnectionPermissionBatch.ps1
         . $PSScriptRoot/Remove-PBICloudConnectionPermission.ps1
 
+        # Make external functions available for mocking
+        function Write-ErrorLogMessage { param($Message) }
+
         Mock Write-Error {}
         Mock Write-Warning {}
     }

@@ -8,6 +8,27 @@ Describe "Remove-PBICloudConnectionPermission" {
         # Dot source the function file
         . $PSScriptRoot/Remove-PBICloudConnectionPermission.ps1
 
+        # Make external functions available for mocking
+        # Ref: https://github.com/zerofailed/ZeroFailed.DevOps.Common
+        function Invoke-RestMethodWithRateLimit {
+            param (
+                [Parameter(Mandatory=$true)]
+                [hashtable] $Splat,
+                
+                [Parameter()]
+                [int] $MaxRetries = 3,
+                
+                [Parameter()]
+                [double] $BaseDelaySeconds = 1.0,
+                
+                [Parameter()]
+                [int] $MaxDelaySeconds = 60,
+
+                [Parameter()]
+                [double] $RetryBackOffExponentialFactor = 1.5
+            )
+        }
+
         Mock Write-Error {}
         Mock Write-Warning {}
     }
