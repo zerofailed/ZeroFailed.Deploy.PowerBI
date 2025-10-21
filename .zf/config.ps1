@@ -18,7 +18,8 @@ $zerofailedExtensions = @(
 
 # Set the required build options
 $PesterTestsDir = "$here/module"
-$PesterVersion = "5.7.1"
+$PesterCodeCoveragePaths = @("$here/module/functions")
+$SkipGeneratePSMarkdownDocs = $true     # temporarily disable until comment-based docs are migrated
 
 # Customise the build process
 task . FullBuild
