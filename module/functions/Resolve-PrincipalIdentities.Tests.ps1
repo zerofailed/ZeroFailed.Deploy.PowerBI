@@ -22,7 +22,7 @@ Describe "Resolve-PrincipalIdentities" {
         It "should return the identity unchanged when principalId and principalType are provided" {
             # Arrange
             $identities = @(
-                @{ principalId = "f3498fd9-cff0-44a9-991c-c017f481adf0"; principalType = "ServicePrincipal" },
+                @{ principalId = "00000000-0000-0000-0000-000000000000"; principalType = "ServicePrincipal" },
                 @{ principalId = "282de1ed-2c46-4b5b-ac1d-06bcf3b19128"; principalType = "Group" }
             )
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force
@@ -32,7 +32,7 @@ Describe "Resolve-PrincipalIdentities" {
 
             # Assert
             $result | Should -HaveCount 2
-            $result[0].principalId | Should -Be "f3498fd9-cff0-44a9-991c-c017f481adf0"
+            $result[0].principalId | Should -Be "00000000-0000-0000-0000-000000000000"
             $result[0].principalType | Should -Be "ServicePrincipal"
             $result[1].principalId | Should -Be "282de1ed-2c46-4b5b-ac1d-06bcf3b19128"
             $result[1].principalType | Should -Be "Group"
@@ -41,7 +41,7 @@ Describe "Resolve-PrincipalIdentities" {
         It "should warn about structured identities missing required properties" {
             # Arrange
             $identities = @(
-                @{ principalId = "f3498fd9-cff0-44a9-991c-c017f481adf0" }, # Missing principalType
+                @{ principalId = "00000000-0000-0000-0000-000000000000" }, # Missing principalType
                 @{ principalType = "User" } # Missing principalId
             )
             $mockToken = ConvertTo-SecureString "mock-token" -AsPlainText -Force

@@ -40,7 +40,7 @@ Describe "Assert-PBICloudConnectionPermissions" {
                             @{
                                 id = "existing-id"
                                 principal = @{
-                                    id = "f3498fd9-cff0-44a9-991c-c017f481adf0"
+                                    id = "00000000-0000-0000-0000-000000000000"
                                     type = "User"
                                 }
                                 role = "User"
@@ -53,7 +53,7 @@ Describe "Assert-PBICloudConnectionPermissions" {
             # Act
             $result = Assert-PBICloudConnectionPermissions `
                 -CloudConnectionId "test-connection" `
-                -AssigneePrincipalId "f3498fd9-cff0-44a9-991c-c017f481adf0" `
+                -AssigneePrincipalId "00000000-0000-0000-0000-000000000000" `
                 -AssigneePrincipalRole "User" `
                 -AssigneePrincipalType "User" `
                 -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)
@@ -72,7 +72,7 @@ Describe "Assert-PBICloudConnectionPermissions" {
                             @{
                                 id = "existing-id"
                                 principal = @{
-                                    id = "f3498fd9-cff0-44a9-991c-c017f481adf0"
+                                    id = "00000000-0000-0000-0000-000000000000"
                                     type = "User"
                                 }
                                 role = "User"
@@ -87,7 +87,7 @@ Describe "Assert-PBICloudConnectionPermissions" {
             # Act
             $result = Assert-PBICloudConnectionPermissions `
                 -CloudConnectionId "test-connection" `
-                -AssigneePrincipalId "f3498fd9-cff0-44a9-991c-c017f481adf0" `
+                -AssigneePrincipalId "00000000-0000-0000-0000-000000000000" `
                 -AssigneePrincipalRole "Owner" `
                 -AssigneePrincipalType "User" `
                 -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)
@@ -116,7 +116,7 @@ Describe "Assert-PBICloudConnectionPermissions" {
             # Act
             $result = Assert-PBICloudConnectionPermissions `
                 -CloudConnectionId "test-connection" `
-                -AssigneePrincipalId "f3498fd9-cff0-44a9-991c-c017f481adf0" `
+                -AssigneePrincipalId "00000000-0000-0000-0000-000000000000" `
                 -AssigneePrincipalRole "User" `
                 -AssigneePrincipalType "ServicePrincipal" `
                 -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)

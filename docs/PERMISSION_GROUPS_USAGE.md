@@ -45,7 +45,7 @@ cloudConnections:
     permissions:
       owners:
         - admin@company.com
-        - principalId: "f3498fd9-cff0-44a9-991c-c017f481adf0"
+        - principalId: "00000000-0000-0000-0000-000000000000"
           principalType: "ServicePrincipal"
       users:
         - prod.team@company.com
@@ -103,7 +103,7 @@ $permissionGroups = @{
     owners = @("admin@company.com")
     users = @(
         "user@company.com",
-        @{ principalId = "f3498fd9-cff0-44a9-991c-c017f481adf0"; principalType = "ServicePrincipal" }
+        @{ principalId = "00000000-0000-0000-0000-000000000000"; principalType = "ServicePrincipal" }
     )
     reshareUsers = @()
 }

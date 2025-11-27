@@ -10,8 +10,8 @@ Describe '_Resolve-ServicePrincipal' {
         $servicePrincipals = @{
             development = @{
                 clientId = '70982f14-17c2-4eb3-867d-7e68b9a902b7'
-                secretUrl = 'https://endjintest.vault.azure.net/secrets/dev-connection-secret/'
-                tenantId = '1c89d1da-a483-414f-ac8c-ccaf199db0a7'
+                secretUrl = 'https://mykeyvault.vault.azure.net/secrets/dev-connection-secret/'
+                tenantId = '00000000-0000-0000-0000-000000000001'
             }
         }
     }

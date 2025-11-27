@@ -72,8 +72,6 @@ graph TD
     - `connectionTargets`: Path to connection targets configuration.
     - `connections`: List of connection group files (e.g., `development`, `testing`, `special-purpose`).
   - `settings`: Global settings:
-    - `vaultBaseUrl`: Base URL for Azure Key Vault secrets.
-    - `defaultOwner`: Default owner email.
     - `defaultTenantId`: Default Azure tenant ID.
 
 #### 2. **Connection Targets (`connectionTargets.yaml`)**

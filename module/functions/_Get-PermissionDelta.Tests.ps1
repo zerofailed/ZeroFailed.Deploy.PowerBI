@@ -173,10 +173,10 @@ Describe "_Get-PermissionDelta" {
         It "should handle principal ID case differences correctly" {
             # Arrange
             $current = @(
-                @{ id = "1"; principal = @{ id = "F3498FD9-CFF0-44A9-991C-C017F481ADF0"; type = "User" }; role = "User" }
+                @{ id = "1"; principal = @{ id = "00000000-0000-0000-0000-000000000000"; type = "User" }; role = "User" }
             )
             $desired = @(
-                @{ principalId = "f3498fd9-cff0-44a9-991c-c017f481adf0"; principalType = "User"; role = "Owner" }
+                @{ principalId = "00000000-0000-0000-0000-000000000000"; principalType = "User"; role = "Owner" }
             )
 
             # Act
@@ -187,7 +187,7 @@ Describe "_Get-PermissionDelta" {
             $result.ToUpdate | Should -HaveCount 1 # Should find the match despite case difference
             $result.ToRemove | Should -HaveCount 0
             
-            $result.ToUpdate[0].principalId | Should -Be "f3498fd9-cff0-44a9-991c-c017f481adf0"
+            $result.ToUpdate[0].principalId | Should -Be "00000000-0000-0000-0000-000000000000"
             $result.ToUpdate[0].newRole | Should -Be "Owner"
         }
     }

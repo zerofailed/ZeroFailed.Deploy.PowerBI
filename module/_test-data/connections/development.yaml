@@ -10,11 +10,11 @@ cloudConnections:
       useTarget: blobStorage.dev
     permissions:
       owners:
-        - jessica.hill@endjin.com
-        - principalId: "f3498fd9-cff0-44a9-991c-c017f481adf0"
+        - fabricadm@contoso.com
+        - principalId: "00000000-0000-0000-0000-000000000000"
           principalType: "ServicePrincipal"
       users:
-        - dev.team@endjin.com
+        - dev.team@contoso.com
       reshareUsers: []
 
   # Development SQL using shared service principal and target
@@ -28,13 +28,13 @@ cloudConnections:
           value: db1
     permissions:
       owners:
-        - jessica.hill@endjin.com
+        - fabricadm@contoso.com
       users:
-        - dev.team@endjin.com
+        - dev.team@contoso.com
         - principalId: "282de1ed-2c46-4b5b-ac1d-06bcf3b19128"
           principalType: "Group"
       reshareUsers:
-        - power.users@endjin.com
+        - power.users@contoso.com
 
   # Development SQL using shared service principal and target
   - displayName: Development SQL Database2
@@ -47,10 +47,10 @@ cloudConnections:
           value: db2
     permissions:
       owners:
-        - jessica.hill@endjin.com
+        - fabricadm@contoso.com
       users:
-        - dev.team@endjin.com
+        - dev.team@contoso.com
         - principalId: "282de1ed-2c46-4b5b-ac1d-06bcf3b19128"
           principalType: "Group"
       reshareUsers:
-        - power.users@endjin.com
+        - power.users@contoso.com

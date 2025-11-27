@@ -38,7 +38,7 @@ principal IDs and types. Email addresses are resolved using Microsoft Graph API.
 
 $identities = @(
     "user@domain.com",
-    @{ principalId = "f3498fd9-cff0-44a9-991c-c017f481adf0"; principalType = "ServicePrincipal" }
+    @{ principalId = "00000000-0000-0000-0000-000000000000"; principalType = "ServicePrincipal" }
 )
 $resolved = Resolve-PrincipalIdentities -Identities $identities -GraphAccessToken $graphToken
 #>

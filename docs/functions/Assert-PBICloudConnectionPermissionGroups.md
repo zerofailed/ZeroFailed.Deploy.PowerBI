@@ -49,7 +49,7 @@ $permissionGroups = @{
     owners = @("admin@company.com")
     users = @(
         "user1@company.com",
-        @{ principalId = "f3498fd9-cff0-44a9-991c-c017f481adf0"; principalType = "ServicePrincipal" }
+        @{ principalId = "00000000-0000-0000-0000-000000000000"; principalType = "ServicePrincipal" }
     )
     reshareUsers = @("poweruser@company.com")
 }

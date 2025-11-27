@@ -10,9 +10,9 @@ cloudConnections:
       useTarget: blobStorage.test
     permissions:
       owners:
-        - jessica.hill@endjin.com
+        - fabricadm@contoso.com
       users:
-        - test.team@endjin.com
+        - test.team@contoso.com
       reshareUsers: []
 
   # Test SQL with a reference to existing connection's service principal
@@ -23,7 +23,7 @@ cloudConnections:
       useTarget: sqlServer.test
     permissions:
       owners:
-        - jessica.hill@endjin.com
+        - fabricadm@contoso.com
       users:
-        - test.team@endjin.com
+        - test.team@contoso.com
       reshareUsers: []

@@ -6,14 +6,14 @@ cloudConnections:
   - displayName: Backup Blob Storage
     type: AzureBlobs
     servicePrincipal:
-      clientId: b11daaf1-0623-4207-9539-15b467133ec7
-      secretUrl: https://endjintest.vault.azure.net/secrets/backup-secret/
+      clientId: 00000000-0000-0000-0000-000000000000
+      secretUrl: https://mykeyvault.vault.azure.net/secrets/backup-secret/
       tenantId: 1c89d1da-a483-414f-ac8c-ccaf199db0a7
     target:
       useTarget: blobStorage.dev  # Reuse dev storage account
     permissions:
       owners:
-        - jessica.hill@endjin.com
+        - fabricadm@contoso.com
       users:
-        - backup.team@endjin.com
+        - backup.team@contoso.com
       reshareUsers: []

@@ -37,12 +37,12 @@ Describe 'Resolve-CloudConnections' {
             $devConnection.type | Should -Be 'AzureBlobs'
             $devConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
             $devConnection.target | Where-Object { $_.name -eq 'domain' } | Select-Object -ExpandProperty value | Should -Be 'blob.core.windows.net'
-            $devConnection.permissions.owners | Should -Contain 'jessica.hill@endjin.com'
+            $devConnection.permissions.owners | Should -Contain 'fabricadm@contoso.com'
 
             # Verify custom connection properties
             $customConnection = $results | Where-Object { $_.displayName -eq 'Custom Blob Storage' }
             $customConnection | Should -Not -BeNullOrEmpty
-            $customConnection.servicePrincipal.clientId | Should -Be '943a5f46-86eb-4a39-b34f-cb3046dfa30d'
+            $customConnection.servicePrincipal.clientId | Should -Be '00000000-0000-0000-0000-000000000000'
             $customConnection.target | Where-Object { $_.name -eq 'account' } | Select-Object -ExpandProperty value | Should -Be 'customstorage'
         }
 
