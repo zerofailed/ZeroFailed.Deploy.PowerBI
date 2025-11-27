@@ -2,59 +2,10 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
-<#
-.SYNOPSIS
-Removes multiple permissions from a Power BI shareable cloud connection in batch.
-
-.DESCRIPTION
-This function removes multiple role assignments from a Power BI shareable cloud connection.
-It processes removals sequentially with error handling and optional retry logic.
-
-.PARAMETER CloudConnectionId
-The ID of the Power BI shareable cloud connection.
-
-.PARAMETER RoleAssignments
-Array of role assignment objects to remove. Each object should contain at least an 'id' property.
-
-.PARAMETER AccessToken
-Secure string containing the access token for the Power BI Fabric API.
-
-.PARAMETER ContinueOnError
-Switch to continue processing remaining removals even if some fail.
-
-.PARAMETER DelayBetweenRequestsMs
-Optional delay in milliseconds between individual API requests to prevent rate limiting.
-
-.PARAMETER BatchSize
-Optional batch size for processing requests. When specified, introduces a pause between batches.
-
-.OUTPUTS
-Returns a hashtable with success and failure counts, plus details of any failures.
-
-.EXAMPLE
-$assignmentsToRemove = @(
-    @{ id = "assignment1"; principalId = "user1" },
-    @{ id = "assignment2"; principalId = "user2" }
-)
-
-$result = Remove-PBICloudConnectionPermissionBatch `
-    -CloudConnectionId "connection-id" `
-    -RoleAssignments $assignmentsToRemove `
-    -AccessToken $token.Token `
-    -ContinueOnError
-
-.EXAMPLE
-# With throttling to prevent rate limits
-$result = Remove-PBICloudConnectionPermissionBatch `
-    -CloudConnectionId "connection-id" `
-    -RoleAssignments $assignmentsToRemove `
-    -AccessToken $token.Token `
-    -DelayBetweenRequestsMs 500 `
-    -BatchSize 10
-#>
 function Remove-PBICloudConnectionPermissionBatch
 {
     [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([hashtable])]
     param (
         [Parameter(Mandatory=$true)]
         [string] $CloudConnectionId,

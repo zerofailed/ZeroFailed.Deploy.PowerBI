@@ -2,37 +2,10 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
-<#
-.SYNOPSIS
-Removes a specific permission from a Power BI shareable cloud connection.
-
-.DESCRIPTION
-This function removes a role assignment from a Power BI shareable cloud connection using the
-Fabric API. It's designed to work with the permission synchronization system to remove
-unauthorized or outdated permissions.
-
-.PARAMETER CloudConnectionId
-The ID of the Power BI shareable cloud connection.
-
-.PARAMETER RoleAssignmentId
-The ID of the role assignment to remove. This is obtained from the existing permissions list.
-
-.PARAMETER AccessToken
-Secure string containing the access token for the Power BI Fabric API.
-
-.OUTPUTS
-Returns the response from the Power BI API call, or $null if the operation was successful.
-
-.EXAMPLE
-Remove-PBICloudConnectionPermission `
-    -CloudConnectionId "a60de636-56cf-4775-8217-76bb5b33bbb3" `
-    -RoleAssignmentId "assignment-id-here" `
-    -AccessToken $token.Token
-#>
-
 function Remove-PBICloudConnectionPermission
 {
     [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([System.Object])]
     param (
         [Parameter(Mandatory=$true)]
         [string] $CloudConnectionId,

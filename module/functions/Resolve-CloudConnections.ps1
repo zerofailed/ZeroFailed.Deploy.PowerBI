@@ -4,38 +4,9 @@
 
 using namespace System.Collections.Generic
 
-<#
-.SYNOPSIS
-Resolves and denormalizes cloud connection configurations from YAML files.
-
-.DESCRIPTION
-This function reads a main configuration file, along with referenced service principals
-and connection targets, to produce a denormalized list of cloud connection objects.
-It handles the resolution of references and merges global settings into each connection.
-
-.PARAMETER ConfigPath
-The path to the main configuration YAML file (e.g., config.yaml).
-
-.PARAMETER ConnectionFilter
-An array of wildcard string expressions used to filter the connections that will be processed, based on their display name.
-
-.OUTPUTS
-Returns a list of denormalized cloud connection objects, each containing all resolved details.
-
-.EXAMPLE
-$connections = Resolve-CloudConnections -ConfigPath "C:\config\main.yaml"
-foreach ($conn in $connections) {
-    Write-Host "Connection: $($conn.displayName), Type: $($conn.type)"
-}
-
-.EXAMPLE
-$connections = Resolve-CloudConnections -ConfigPath "C:\config\main.yaml" -ConnectionFilter SQL*DEV*
-foreach ($conn in $connections) {
-    Write-Host "Connection: $($conn.displayName), Type: $($conn.type)"
-}
-#>
 function Resolve-CloudConnections {
     [CmdletBinding()]
+    [OutputType([array])]
     param(
         [Parameter(Mandatory)]
         [string]$ConfigPath,

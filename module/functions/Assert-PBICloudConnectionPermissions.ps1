@@ -2,55 +2,25 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
-<#
-.SYNOPSIS
-Ensures that the specified Power BI shareable cloud connection exists.
-
-.DESCRIPTION
-Ensures that the specified Power BI shareable cloud connection exists. If the connection already exists, the function updates it;
-otherwise, it creates a new connection using the provided parameters.
-
-.PARAMETER DisplayName
-The display name of the Power BI shareable cloud connection.
-
-.OUTPUTS
-Returns the response from the Power BI API call.
-
-.EXAMPLE
-# Example usage to update an existing connection or create a new one:
-$secureToken = ConvertTo-SecureString "token" -AsPlainText -Force
-$secureSecret = ConvertTo-SecureString "secret" -AsPlainText -Force
-
-$response = Assert-PBIShareableCloudConnection `
-    -DisplayName "MyConnection" `
-    -ConnectionType "ExampleType" `
-    -Parameters @{ key = "value" } `
-    -ServicePrincipalClientId "clientId" `
-    -ServicePrincipalSecret $secureSecret `
-    -TenantId "tenantId" `
-    -AccessToken $secureToken
-
-Write-Output $response
-#>
-
 function Assert-PBICloudConnectionPermissions
 {
     [CmdletBinding()]
+    [OutputType([System.Object])]
     param (
         [Parameter(Mandatory=$true)]
         [string] $CloudConnectionId,
+
         [Parameter(Mandatory=$true)]
         [guid] $AssigneePrincipalId,
-        # [Parameter(Mandatory=$true)]
-        # [hashtable[]] $Parameters,
-        # [Parameter(Mandatory=$true)]
-        # [guid] $ServicePrincipalClientId,
+
         [Parameter(Mandatory=$true)]
         [ValidateSet("Owner", "User", "UserWithReshare")]
         [string] $AssigneePrincipalRole,
+
         [Parameter(Mandatory=$true)]
         [ValidateSet("User", "Group", "ServicePrincipal", "ServicePrincipalProfile")]
         [string] $AssigneePrincipalType,
+
         [Parameter(Mandatory=$true)]
         [securestring] $AccessToken
     )

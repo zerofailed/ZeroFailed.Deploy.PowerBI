@@ -13,7 +13,17 @@ $zerofailedExtensions = @(
 # Set the required build options
 $PesterTestsDir = "$here/module"
 $PesterCodeCoveragePaths = @("$here/module/functions")
-$SkipGeneratePSMarkdownDocs = $true     # temporarily disable until comment-based docs are migrated
+$PowerShellModulesToPublish = @(
+    @{
+        ModulePath = "$here/module/ZeroFailed.Deploy.PowerBI.psd1"
+        FunctionsToExport = @("*")
+        CmdletsToExport = @()
+        AliasesToExport = @()
+    }
+)
+$PSMarkdownDocsFlattenOutputPath = $true
+$PSMarkdownDocsOutputPath = './docs/functions'
+$PSMarkdownDocsIncludeModulePage = $false
 
 # Customise the build process
 task . FullBuild

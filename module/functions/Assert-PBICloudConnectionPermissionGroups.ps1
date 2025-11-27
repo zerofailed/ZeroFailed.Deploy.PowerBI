@@ -2,72 +2,10 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
-<#
-.SYNOPSIS
-Ensures that the specified Power BI cloud connection has the exact set of permissions defined in the configuration.
-
-.DESCRIPTION
-This function provides comprehensive permission group management for Power BI shareable cloud connections.
-It performs strict synchronization, ensuring that only the permissions specified in the configuration exist
-on the cloud connection. It supports both email addresses and explicit principal IDs, with automatic resolution
-of email addresses to principal IDs using Microsoft Graph API.
-
-The function will:
-1. Resolve all identities in the permission groups (email addresses to principal IDs)
-2. Get current permissions from the cloud connection
-3. Calculate the delta (additions, updates, removals needed)
-4. Apply all necessary changes to achieve the desired state
-
-.PARAMETER CloudConnectionId
-The ID of the Power BI shareable cloud connection.
-
-.PARAMETER PermissionGroups
-Hashtable containing permission groups with keys like "owners", "users", "reshareUsers".
-Each group contains an array of identities (email addresses or structured objects with principalId/principalType).
-
-.PARAMETER AccessToken
-Secure string containing the access token for the Power BI Fabric API.
-
-.PARAMETER GraphAccessToken
-Secure string containing the access token for Microsoft Graph API (for resolving email addresses).
-
-.PARAMETER StrictMode
-Switch to enable strict synchronization. When enabled (default), any permissions not specified
-in the configuration will be removed.
-
-.PARAMETER DryRun
-Switch to perform a dry run without making any actual changes. Useful for testing and validation.
-
-.PARAMETER ContinueOnError
-Switch to continue applying permission changes even if some operations fail. NOTE: Failures during pre-requisite operations will still terminate processing (e.g. resolving Entra identities)
-
-.OUTPUTS
-Returns a detailed result object containing:
-- Summary of operations performed
-- Any errors encountered
-- Before and after permission states
-
-.EXAMPLE
-$permissionGroups = @{
-    owners = @("admin@company.com")
-    users = @(
-        "user1@company.com",
-        @{ principalId = "f3498fd9-cff0-44a9-991c-c017f481adf0"; principalType = "ServicePrincipal" }
-    )
-    reshareUsers = @("poweruser@company.com")
-}
-
-$result = Assert-PBICloudConnectionPermissionGroups `
-    -CloudConnectionId "a60de636-56cf-4775-8217-76bb5b33bbb3" `
-    -PermissionGroups $permissionGroups `
-    -AccessToken $fabricToken.Token `
-    -GraphAccessToken $graphToken.Token `
-    -StrictMode
-#>
-
 function Assert-PBICloudConnectionPermissionGroups
 {
     [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([System.Object])]
     param (
         [Parameter(Mandatory=$true)]
         [string] $CloudConnectionId,

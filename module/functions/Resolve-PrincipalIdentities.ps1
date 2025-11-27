@@ -2,42 +2,12 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
-<#
-.SYNOPSIS
-Resolves a collection of identities (email addresses or structured objects) to principal IDs and types.
-
-.DESCRIPTION
-This function takes a mixed array of identities - either email address strings or structured objects 
-with principalId and principalType properties - and resolves them to a consistent format with 
-principal IDs and types. Email addresses are resolved using Microsoft Graph API.
-
-.PARAMETER Identities
-Array of identities to resolve. Can contain:
-- Email address strings (e.g., "user@domain.com")
-- Structured objects with principalId and principalType properties
-
-.PARAMETER GraphAccessToken
-Secure string containing the Microsoft Graph API access token for resolving email addresses.
-
-.PARAMETER UseCache
-Switch to enable caching of resolved identities for performance optimization.
-
-.OUTPUTS
-Returns an array of objects with resolved principalId, principalType, and originalIdentity properties.
-
-.EXAMPLE
-$identities = @(
-    "user@domain.com",
-    @{ principalId = "f3498fd9-cff0-44a9-991c-c017f481adf0"; principalType = "ServicePrincipal" }
-)
-$resolved = Resolve-PrincipalIdentities -Identities $identities -GraphAccessToken $graphToken
-#>
-
 using namespace System.Collections.Generic
 
 function Resolve-PrincipalIdentities
 {
     [CmdletBinding()]
+    [OutputType([array])]
     param (
         [Parameter(Mandatory=$true)]
         [object[]] $Identities,
