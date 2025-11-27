@@ -14,5 +14,5 @@ $PowerBiContinueOnError = $true
 # Synopsis: An array of wildcard expressions used to filter which cloud connections will be processed, based on their display name
 $CloudConnectionFilters ??= @()
 
-# Synopsis: TBC
+# Synopsis: The path to the directory containing the cloud connection configuration files
 $CloudConnectionsConfigPath ??= ''
