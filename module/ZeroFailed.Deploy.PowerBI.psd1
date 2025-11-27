@@ -119,12 +119,6 @@ PrivateData = @{
     ZeroFailed = @{
         ExtensionDependencies = @(
             @{
-                # Temporarily pin to pre-release version with rate-limit support
-                Name = "ZeroFailed.DevOps.Common"
-                GitRepository = "https://github.com/zerofailed/ZeroFailed.DevOps.Common"
-                GitRef = "feature/rate-limits-handling"
-            }
-            @{
                 # Assume latest stable version
                 Name = "ZeroFailed.Deploy.Common"
                 GitRepository = "https://github.com/zerofailed/ZeroFailed.Deploy.Common"

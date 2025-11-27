@@ -1,11 +1,5 @@
 # Extensions setup
 $zerofailedExtensions = @(
-    # Temporarily reference pre-release version to ensure rate limit commands are available to the tests
-    @{
-        Name = "ZeroFailed.DevOps.Common"
-        GitRepository = "https://github.com/zerofailed/ZeroFailed.DevOps.Common.git"
-        GitRef = "feature/rate-limits-handling"
-    }
     @{
         Name = "ZeroFailed.Build.PowerShell"
         GitRepository = "https://github.com/zerofailed/ZeroFailed.Build.PowerShell.git"
