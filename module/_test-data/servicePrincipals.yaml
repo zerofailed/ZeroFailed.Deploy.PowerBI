@@ -1,0 +1,12 @@
+# Service Principals Configuration
+version: '1.0'
+
+servicePrincipals:
+  development:
+    clientId: 70982f14-17c2-4eb3-867d-7e68b9a902b7
+    secretUrl: https://mykeyvault.vault.azure.net/secrets/dev-connection-secret/
+    tenantId: 00000000-0000-0000-0000-000000000001
+
+  test:
+    clientId: 00000000-0000-0000-0000-000000000000
+    secretUrl: https://mykeyvault.vault.azure.net/secrets/test-connection-secret/

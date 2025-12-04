@@ -1,0 +1,19 @@
+# Special Purpose Cloud Connections
+version: '1.0'
+
+cloudConnections:
+  # Backup storage using dev target
+  - displayName: Backup Blob Storage
+    type: AzureBlobs
+    servicePrincipal:
+      clientId: 00000000-0000-0000-0000-000000000000
+      secretUrl: https://mykeyvault.vault.azure.net/secrets/backup-secret/
+      tenantId: 1c89d1da-a483-414f-ac8c-ccaf199db0a7
+    target:
+      useTarget: blobStorage.dev  # Reuse dev storage account
+    permissions:
+      owners:
+        - fabricadm@contoso.com
+      users:
+        - backup.team@contoso.com
+      reshareUsers: []

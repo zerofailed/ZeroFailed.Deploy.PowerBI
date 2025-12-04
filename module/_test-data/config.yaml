@@ -1,0 +1,18 @@
+# PowerBI Cloud Connections Main Configuration
+version: '1.0'
+
+# Configuration file references
+configurationFiles:
+  servicePrincipals: servicePrincipals.yaml
+  connectionTargets: connectionTargets.yaml
+  
+# Global settings
+settings:
+  defaultTenantId: 00000000-0000-0000-0000-000000000000
+
+# Note: You can add more connection group files by adding them to the connections list above.
+# This allows for flexible organization of connections based on:
+# - Environment (dev, test, prod)
+# - Department or team
+# - Purpose or project
+# - Any other logical grouping

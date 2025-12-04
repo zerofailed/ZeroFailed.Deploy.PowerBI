@@ -1,0 +1,29 @@
+# Testing Environment Cloud Connections
+version: '1.0'
+
+cloudConnections:
+  # Test Blob Storage with inline properties
+  - displayName: Test Blob Storage
+    type: AzureBlobs
+    useServicePrincipal: test
+    target:
+      useTarget: blobStorage.test
+    permissions:
+      owners:
+        - fabricadm@contoso.com
+      users:
+        - test.team@contoso.com
+      reshareUsers: []
+
+  # Test SQL with a reference to existing connection's service principal
+  - displayName: Test SQL Database
+    type: SQL
+    useServicePrincipal: test
+    target:
+      useTarget: sqlServer.test
+    permissions:
+      owners:
+        - fabricadm@contoso.com
+      users:
+        - test.team@contoso.com
+      reshareUsers: []

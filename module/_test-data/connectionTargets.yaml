@@ -1,0 +1,35 @@
+# Connection Targets Configuration
+version: '1.0'
+
+connectionTargets:
+  blobStorage:
+    dev:
+      - dataType: Text
+        name: domain
+        value: blob.core.windows.net
+      - dataType: Text
+        name: account
+        value: devstorageaccount  
+    test:
+      - dataType: Text
+        name: domain
+        value: blob.core.windows.net
+      - dataType: Text
+        name: account
+        value: teststorageaccount    
+
+  sqlServer:
+    dev:
+      - dataType: Text
+        name: server
+        value: devsql.database.windows.net
+      - dataType: Text
+        name: database
+        value: DevDB      
+    test:
+      - dataType: Text
+        name: server
+        value: testsql.database.windows.net
+      - dataType: Text
+        name: database
+        value: TestDB

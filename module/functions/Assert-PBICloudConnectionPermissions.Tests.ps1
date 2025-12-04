@@ -1,0 +1,133 @@
+# <copyright file="Assert-PBICloudConnectionPermissions.Tests.ps1" company="Endjin Limited">
+# Copyright (c) Endjin Limited. All rights reserved.
+# </copyright>
+
+Describe "Assert-PBICloudConnectionPermissions" {
+
+    BeforeAll {
+        # Dot source the function files
+        . $PSScriptRoot/Assert-PBICloudConnectionPermissions.ps1
+
+        # Make external functions available for mocking
+        # Ref: https://github.com/zerofailed/ZeroFailed.DevOps.Common
+        function Invoke-RestMethodWithRateLimit {
+            param (
+                [Parameter(Mandatory=$true)]
+                [hashtable] $Splat,
+                
+                [Parameter()]
+                [int] $MaxRetries = 3,
+                
+                [Parameter()]
+                [double] $BaseDelaySeconds = 1.0,
+                
+                [Parameter()]
+                [int] $MaxDelaySeconds = 60,
+
+                [Parameter()]
+                [double] $RetryBackOffExponentialFactor = 1.5
+            )
+        }
+    }
+
+    Context "When an existing permission is found" {
+        It "should not update when the role is the same" {
+            # Arrange: mock GET to return an existing permission with same role
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
+                    return @{
+                        value = @(
+                            @{
+                                id = "existing-id"
+                                principal = @{
+                                    id = "00000000-0000-0000-0000-000000000000"
+                                    type = "User"
+                                }
+                                role = "User"
+                            }
+                        )
+                    }
+                }
+            }
+
+            # Act
+            $result = Assert-PBICloudConnectionPermissions `
+                -CloudConnectionId "test-connection" `
+                -AssigneePrincipalId "00000000-0000-0000-0000-000000000000" `
+                -AssigneePrincipalRole "User" `
+                -AssigneePrincipalType "User" `
+                -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)
+
+            # Assert
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "GET" } -Times 1
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "PATCH" } -Times 0
+        }
+
+        It "should update the permission when the role is different" {
+            # Arrange: mock GET to return existing permission with different role and PATCH to return updated
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
+                    return @{
+                        value = @(
+                            @{
+                                id = "existing-id"
+                                principal = @{
+                                    id = "00000000-0000-0000-0000-000000000000"
+                                    type = "User"
+                                }
+                                role = "User"
+                            }
+                        )
+                    }
+                } elseif ($Splat.Method -eq "PATCH") {
+                    return "updated"
+                }
+            }
+
+            # Act
+            $result = Assert-PBICloudConnectionPermissions `
+                -CloudConnectionId "test-connection" `
+                -AssigneePrincipalId "00000000-0000-0000-0000-000000000000" `
+                -AssigneePrincipalRole "Owner" `
+                -AssigneePrincipalType "User" `
+                -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)
+
+            # Assert
+            $result | Should -Be "updated"
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "GET" } -Times 1
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { 
+                $Splat.Method -eq "PATCH" -and
+                $Splat.Body -like '*"role":"Owner"*'
+            } -Times 1
+        }
+    }
+
+    Context "When no existing permission is found" {
+        It "should create new permission via POST" {
+            # Arrange: mock GET to return no permissions and POST to return created
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
+                    return @{ value = @() }
+                } elseif ($Splat.Method -eq "POST") {
+                    return "created"
+                }
+            }
+
+            # Act
+            $result = Assert-PBICloudConnectionPermissions `
+                -CloudConnectionId "test-connection" `
+                -AssigneePrincipalId "00000000-0000-0000-0000-000000000000" `
+                -AssigneePrincipalRole "User" `
+                -AssigneePrincipalType "ServicePrincipal" `
+                -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)
+
+            # Assert
+            $result | Should -Be "created"
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "GET" } -Times 1
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { 
+                $Splat.Method -eq "POST" -and
+                $Splat.Body -like '*"type":"ServicePrincipal"*'
+            } -Times 1
+        }
+    }
+}

@@ -1,0 +1,56 @@
+# Development Environment Cloud Connections
+version: '1.0'
+
+cloudConnections:
+  # Development Blob Storage using shared service principal and target
+  - displayName: Development Blob Storage
+    type: AzureBlobs
+    useServicePrincipal: development
+    target:
+      useTarget: blobStorage.dev
+    permissions:
+      owners:
+        - fabricadm@contoso.com
+        - principalId: "00000000-0000-0000-0000-000000000000"
+          principalType: "ServicePrincipal"
+      users:
+        - dev.team@contoso.com
+      reshareUsers: []
+
+  # Development SQL using shared service principal and target
+  - displayName: Development SQL Database1
+    type: SQL
+    useServicePrincipal: development
+    target:
+      useTarget: sqlServer.dev
+      parameters:
+        - name: database
+          value: db1
+    permissions:
+      owners:
+        - fabricadm@contoso.com
+      users:
+        - dev.team@contoso.com
+        - principalId: "282de1ed-2c46-4b5b-ac1d-06bcf3b19128"
+          principalType: "Group"
+      reshareUsers:
+        - power.users@contoso.com
+
+  # Development SQL using shared service principal and target
+  - displayName: Development SQL Database2
+    type: SQL
+    useServicePrincipal: development
+    target:
+      useTarget: sqlServer.dev
+      parameters:
+        - name: database
+          value: db2
+    permissions:
+      owners:
+        - fabricadm@contoso.com
+      users:
+        - dev.team@contoso.com
+        - principalId: "282de1ed-2c46-4b5b-ac1d-06bcf3b19128"
+          principalType: "Group"
+      reshareUsers:
+        - power.users@contoso.com

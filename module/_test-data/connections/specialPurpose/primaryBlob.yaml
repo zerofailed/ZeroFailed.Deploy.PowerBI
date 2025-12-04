@@ -1,0 +1,25 @@
+# Special Purpose Cloud Connections
+version: '1.0'
+
+cloudConnections:
+  # Custom Blob Storage with inline properties
+  - displayName: Custom Blob Storage
+    type: AzureBlobs
+    servicePrincipal:
+      clientId: 00000000-0000-0000-0000-000000000000
+      secretUrl: https://mykeyvault.vault.azure.net/secrets/custom-secret/
+      tenantId: 00000000-0000-0000-0000-000000000001
+    target:
+      parameters:
+        - dataType: Text
+          name: domain
+          value: blob.core.windows.net
+        - dataType: Text
+          name: account
+          value: customstorage
+    permissions:
+      owners:
+        - fabricadm@contoso.com
+      users:
+        - custom.team@contoso.com
+      reshareUsers: []
