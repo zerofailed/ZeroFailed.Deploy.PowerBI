@@ -58,11 +58,11 @@ function Remove-PBICloudConnectionPermissionBatch
                     -CloudConnectionId $CloudConnectionId `
                     -RoleAssignmentId $assignment.id `
                     -AccessToken $AccessToken
+                $successCount++
+                Write-Verbose "Successfully removed role assignment $($assignment.id)"
             }
 
-            $successCount++
             $requestCount++
-            Write-Verbose "Successfully removed role assignment $($assignment.id)"
             
             # Apply throttling if configured
             if ($DelayBetweenRequestsMs -gt 0 -and $requestCount -lt $RoleAssignments.Count) {
