@@ -36,6 +36,10 @@ task deployPowerBISharedCloudConnection -After DeployCore {
                                 -ConnectionsConfigPath $CloudConnectionsConfigPath `
                                 -ConnectionFilter $CloudConnectionFilters
 
+    # displayName -> id for every connection processed, so that a caller can consume the ids
+    # rather than scraping them out of the build log (which is the only place they went before).
+    $script:DeployedCloudConnectionIds = @{}
+
     foreach ($connection in $cloudConnections) {
 
         Write-Build Green "`nProcessing shared cloud connection: $($connection.displayName)"

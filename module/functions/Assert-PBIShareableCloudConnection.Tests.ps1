@@ -9,6 +9,7 @@ Describe "Assert-PBIShareableCloudConnection" {
         . $PSScriptRoot/Assert-PBIShareableCloudConnection.ps1
         . $PSScriptRoot/_GenerateCreateBody.ps1
         . $PSScriptRoot/_GenerateUpdateBody.ps1
+        . $PSScriptRoot/_Get-CloudConnectionList.ps1
 
         # Make external functions available for mocking
         # Ref: https://github.com/zerofailed/ZeroFailed.DevOps.Common

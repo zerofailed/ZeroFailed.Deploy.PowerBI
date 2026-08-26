@@ -75,14 +75,12 @@ function Assert-PBIShareableCloudConnection
         }
     }
 
-    $splat = @{ 
-        "Uri" = "https://api.fabric.microsoft.com/v1/connections" 
-        "Method" = "GET"
-        "Headers" = @{Authorization = "Bearer $($AccessToken | ConvertFrom-SecureString -AsPlainText)"; 'Content-type' = 'application/json'}
-    }
-
     try {
-        $existingConnection = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue | Select-Object -ExpandProperty value | Where-Object {$_.displayName -eq $DisplayName}
+        # Paged: a connection on a later page would otherwise look absent, and the create that
+        # followed would fail on a duplicate display name.
+        $existingConnection = _Get-CloudConnectionList -AccessToken $AccessToken |
+                                Where-Object { $_.displayName -eq $DisplayName } |
+                                Select-Object -First 1
 
         if ($existingConnection) {
             Write-Information "Power BI shared cloud connection $DisplayName already exists"
