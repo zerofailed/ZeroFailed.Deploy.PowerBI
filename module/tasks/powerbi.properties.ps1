@@ -16,3 +16,8 @@ $CloudConnectionFilters ??= @()
 
 # Synopsis: The path to the directory containing the cloud connection configuration files
 $CloudConnectionsConfigPath ??= ''
+
+# Synopsis: When true, suppresses credential updates for ALL connections in this run, whatever
+#           their own 'allowCredentialUpdate' setting. For converging structure without touching
+#           any secret.
+$PowerBiSkipCredentialUpdates ??= $false

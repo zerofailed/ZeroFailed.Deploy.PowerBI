@@ -93,6 +93,23 @@ Describe 'Resolve-CloudConnections' {
         }
     }
 
+    Context 'When a connection opts out of credential updates' {
+
+        It 'Should carry the opt-out through denormalization' {
+            $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'EDAP_DEV_sp__hat'
+
+            $connection.credentialType | Should -Be 'ServicePrincipal'
+            $connection.allowCredentialUpdate | Should -BeFalse
+        }
+
+        It 'Should default to allowing updates when the connection says nothing' {
+            # Preserves today's behaviour, and with it the Key Vault secret rotation flow.
+            $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'Development Blob Storage'
+
+            $connection.allowCredentialUpdate | Should -BeTrue
+        }
+    }
+
     Context 'When a connection declares no service principal' {
         # Credential types such as WorkspaceIdentity and Anonymous carry no principal and no
         # tenant. Previously the default-tenant assignment ran unconditionally and threw

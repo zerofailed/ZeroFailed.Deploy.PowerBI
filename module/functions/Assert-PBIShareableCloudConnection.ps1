@@ -45,6 +45,16 @@ function Assert-PBIShareableCloudConnection
         [Parameter(Mandatory=$true)]
         [securestring] $AccessToken,
 
+        # [bool] rather than [switch], deliberately: 'false' has to be expressible from YAML.
+        # Defaults to true, which preserves both today's behaviour and the Key Vault secret
+        # rotation flow that depends on it.
+        [Parameter()]
+        [bool] $AllowCredentialUpdate = $true,
+
+        # Run-level override, for converging structure without touching any credential.
+        [Parameter()]
+        [switch] $SkipCredentialUpdates,
+
         [Parameter()]
         [switch] $ContinueOnError
     )
@@ -76,6 +86,20 @@ function Assert-PBIShareableCloudConnection
 
         if ($existingConnection) {
             Write-Information "Power BI shared cloud connection $DisplayName already exists"
+
+            if ($SkipCredentialUpdates -or -not $AllowCredentialUpdate) {
+                # Updating a connection is not a safe no-op when anything is BOUND to it.
+                # Creating a OneLake shortcut binds it to a cloud connection; changing that
+                # connection leaves the binding stale, every read then fails
+                # '401 Unauthorized on ListBlob', the shortcut still reports healthy in a
+                # list_shortcuts response, and delete-and-recreate does not reliably recover it.
+                # Verified against a live tenant on 2026-08-20 - it cost a day of downtime.
+                # The extension cannot know a shortcut exists, which is why this decision lives
+                # in the connection's own configuration.
+                Write-Information "Connection '$DisplayName' already exists - credential updates are disabled for it, leaving it untouched."
+                return $existingConnection
+            }
+
             $updateBody = _GenerateUpdateBody @credentialSplat -DisplayName $DisplayName
             $splat = @{ 
                 "Uri" = "https://api.fabric.microsoft.com/v1/connections/$($existingConnection.id)" 

@@ -96,6 +96,72 @@ Describe "Assert-PBIShareableCloudConnection" {
         }
     }
 
+    Context "When credential updates are suppressed" {
+
+        BeforeAll {
+            $script:existingArgs = @{
+                DisplayName              = "ExistingConnection"
+                ConnectionType           = "TestType"
+                Parameters               = @{}
+                ServicePrincipalClientId = "e795e7b2-a973-436c-a55e-cb06a2fcd68e"
+                ServicePrincipalSecret   = (ConvertTo-SecureString "secret" -AsPlainText -Force)
+                TenantId                 = "tenant"
+                AccessToken              = (ConvertTo-SecureString "token" -AsPlainText -Force)
+            }
+        }
+
+        BeforeEach {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
+                    return @{ value = @([pscustomobject]@{ displayName = "ExistingConnection"; id = "abc123" }) }
+                } elseif ($Splat.Method -eq "PATCH") {
+                    return "updated"
+                }
+            }
+            Mock _GenerateCreateBody -MockWith { return @{} }
+            Mock _GenerateUpdateBody -MockWith { return @{} }
+        }
+
+        It "should PATCH by default, exactly as before" {
+            # The CR-N1 regression guard for this feature: an existing configuration says
+            # nothing about credential updates and must keep converging on the declared state.
+            $result = Assert-PBIShareableCloudConnection @existingArgs
+
+            $result | Should -Be "updated"
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "PATCH" } -Times 1
+        }
+
+        It "should not PATCH when the connection opts out" {
+            $result = Assert-PBIShareableCloudConnection @existingArgs -AllowCredentialUpdate $false
+
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "PATCH" } -Times 0
+            Should -Invoke _GenerateUpdateBody -Times 0
+            $result.id | Should -Be "abc123"
+        }
+
+        It "should not PATCH when the run suppresses all credential updates" {
+            Assert-PBIShareableCloudConnection @existingArgs -SkipCredentialUpdates | Out-Null
+
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "PATCH" } -Times 0
+        }
+
+        It "should still create a connection that does not yet exist" {
+            # The opt-out suppresses updates, not provisioning.
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
+                    return @{ value = @() }
+                } elseif ($Splat.Method -eq "POST") {
+                    return "created"
+                }
+            }
+
+            $result = Assert-PBIShareableCloudConnection @existingArgs -AllowCredentialUpdate $false
+
+            $result | Should -Be "created"
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "POST" } -Times 1
+        }
+    }
+
     Context "When the connection uses a credential type that carries no secret" {
 
         BeforeAll {

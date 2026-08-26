@@ -88,6 +88,8 @@ task deployPowerBISharedCloudConnection -After DeployCore {
             ServicePrincipalSecret = $secretValue.SecretValue
             TenantId = $connection.servicePrincipal.tenantId
             AccessToken = $token.Token
+            AllowCredentialUpdate = $connection.allowCredentialUpdate
+            SkipCredentialUpdates = $PowerBiSkipCredentialUpdates
             ContinueOnError = $PowerBiContinueOnError
         }
 

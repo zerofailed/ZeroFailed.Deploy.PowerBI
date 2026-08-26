@@ -99,6 +99,9 @@ function Resolve-CloudConnections {
                 creationMethod = $conn.creationMethod
                 # Likewise defaulted to 'ServicePrincipal' downstream.
                 credentialType = $conn.credentialType
+                # Defaulted here rather than downstream, because '$false' and 'absent' are
+                # both falsy and cannot be told apart once the value has been copied.
+                allowCredentialUpdate = $conn.ContainsKey('allowCredentialUpdate') ? [bool]$conn.allowCredentialUpdate : $true
             }
 
             # Resolve service principal.
