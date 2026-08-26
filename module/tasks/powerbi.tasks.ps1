@@ -94,6 +94,7 @@ task deployPowerBISharedCloudConnection -After DeployCore {
             AccessToken = $token.Token
             AllowCredentialUpdate = $connection.allowCredentialUpdate
             SkipCredentialUpdates = $PowerBiSkipCredentialUpdates
+            ValidateConnectionType = $PowerBiValidateConnectionTypes
             ContinueOnError = $PowerBiContinueOnError
         }
 
@@ -101,6 +102,7 @@ task deployPowerBISharedCloudConnection -After DeployCore {
         $connectionResult = Assert-PBIShareableCloudConnection @splat
         if ($connectionResult) {
             Write-Build Green "✅ Cloud connection configured [Id=$($connectionResult.Id)]"
+            $script:DeployedCloudConnectionIds[$connection.displayName] = $connectionResult.id
 
             # Manage permissions if specified
             if ($connection.permissions) {

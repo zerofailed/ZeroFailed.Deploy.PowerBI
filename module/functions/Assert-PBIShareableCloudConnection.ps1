@@ -55,6 +55,12 @@ function Assert-PBIShareableCloudConnection
         [Parameter()]
         [switch] $SkipCredentialUpdates,
 
+        # Checks the type, creation method and credential type against the tenant before
+        # attempting a create. Improves diagnosis rather than enabling anything, so it is opt-in
+        # at this level; the task turns it on by default.
+        [Parameter()]
+        [switch] $ValidateConnectionType,
+
         [Parameter()]
         [switch] $ContinueOnError
     )
@@ -108,6 +114,17 @@ function Assert-PBIShareableCloudConnection
             $response = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
         } else {
             Write-Information "Connection does not exist"
+
+            if ($ValidateConnectionType) {
+                # Only worth doing on the create path: an existing connection was already
+                # accepted by the tenant.
+                _Assert-ValidConnectionType -ConnectionType $ConnectionType `
+                                            -CreationMethod $CreationMethod `
+                                            -CredentialType $CredentialType `
+                                            -DisplayName $DisplayName `
+                                            -AccessToken $AccessToken
+            }
+
             Write-Information "Creating Power BI shared cloud connection $DisplayName"
             $generateBodySplat = $credentialSplat + @{
                 displayName = $DisplayName

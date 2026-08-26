@@ -21,3 +21,8 @@ $CloudConnectionsConfigPath ??= ''
 #           their own 'allowCredentialUpdate' setting. For converging structure without touching
 #           any secret.
 $PowerBiSkipCredentialUpdates ??= $false
+
+# Synopsis: When true, validates each connection's type, creation method and credential type
+#           against the tenant before attempting to create it, so a bad definition fails with a
+#           message naming the actual problem rather than an opaque REST error.
+$PowerBiValidateConnectionTypes ??= $true
