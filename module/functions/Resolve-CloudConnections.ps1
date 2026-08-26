@@ -96,19 +96,29 @@ function Resolve-CloudConnections {
                 type = $conn.type
             }
 
-            # Resolve service principal
+            # Resolve service principal.
+            # Not every connection has one: credential types such as WorkspaceIdentity and
+            # Anonymous carry no principal at all, so the key is only added when there is
+            # something to put in it.
             if ($conn.useServicePrincipal) {
                 $sp = _Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference $conn.useServicePrincipal
                 $denormalized.servicePrincipal = $sp
             }
-            else {
+            elseif ($conn.servicePrincipal) {
                 $denormalized.servicePrincipal = $conn.servicePrincipal
             }
 
-            # Apply the default tenant ID if one hasn't been specified
-            if (!$denormalized.servicePrincipal.ContainsKey('tenantId') -or [string]::IsNullOrEmpty($denormalized.servicePrincipal['tenantId'])) {
-                Write-Verbose "Applying default tenant ID to service principal: $($denormalized.servicePrincipal)"
-                $denormalized.servicePrincipal['tenantId'] = $config.settings.defaultTenantId
+            # Apply the default tenant ID if one hasn't been specified.
+            # Both halves of the condition are load-bearing: assigning $null to a hashtable key
+            # still makes ContainsKey() return true, and the previous unconditional form threw
+            # "You cannot call a method on a null-valued expression" for any connection without
+            # a service principal - aborting the whole deployment with an error naming neither
+            # the connection nor the field.
+            if ($denormalized.ContainsKey('servicePrincipal') -and $denormalized.servicePrincipal) {
+                if (!$denormalized.servicePrincipal.ContainsKey('tenantId') -or [string]::IsNullOrEmpty($denormalized.servicePrincipal['tenantId'])) {
+                    Write-Verbose "Applying default tenant ID to service principal: $($denormalized.servicePrincipal)"
+                    $denormalized.servicePrincipal['tenantId'] = $config.settings.defaultTenantId
+                }
             }
 
             # Resolve connection target
