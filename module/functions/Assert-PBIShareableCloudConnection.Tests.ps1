@@ -95,4 +95,79 @@ Describe "Assert-PBIShareableCloudConnection" {
             Should -Invoke _GenerateUpdateBody -Times 0
         }
     }
+
+    Context "When the connection uses a credential type that carries no secret" {
+
+        BeforeAll {
+            . $PSScriptRoot/_GenerateCredentialsBlock.ps1
+        }
+
+        It "should create the connection with no service principal and no parameters" {
+            # Two separate failure modes are being guarded here, both of which stop this call
+            # before any of the credential logic runs:
+            #  - a mandatory [hashtable[]] rejects an empty array outright, and a
+            #    FabricDataPipelines connection has no parameters at all
+            #  - piping a $null secret into ConvertFrom-SecureString fails parameter binding
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
+                    return @{ value = @() }
+                } elseif ($Splat.Method -eq "POST") {
+                    return [pscustomobject]@{ id = "fp-123"; displayName = "EDAP_DEV_fp__shared" }
+                }
+            }
+
+            $result = Assert-PBIShareableCloudConnection -DisplayName "EDAP_DEV_fp__shared" `
+                -ConnectionType "FabricDataPipelines" `
+                -CreationMethod "FabricDataPipelines.Actions" `
+                -CredentialType "WorkspaceIdentity" `
+                -Parameters @() `
+                -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)
+
+            $result.id | Should -Be "fp-123"
+            Should -Invoke Invoke-RestMethodWithRateLimit -ParameterFilter { $Splat.Method -eq "POST" } -Times 1
+        }
+
+        It "should send a create body carrying the credential type alone" {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
+                    return @{ value = @() }
+                } elseif ($Splat.Method -eq "POST") {
+                    $script:capturedBody = $Splat.Body | ConvertFrom-Json
+                    return [pscustomobject]@{ id = "fp-123" }
+                }
+            }
+
+            Assert-PBIShareableCloudConnection -DisplayName "EDAP_DEV_fp__shared" `
+                -ConnectionType "FabricDataPipelines" `
+                -CreationMethod "FabricDataPipelines.Actions" `
+                -CredentialType "WorkspaceIdentity" `
+                -Parameters @() `
+                -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force) | Out-Null
+
+            $capturedBody.connectionDetails.type | Should -Be "FabricDataPipelines"
+            $capturedBody.connectionDetails.creationMethod | Should -Be "FabricDataPipelines.Actions"
+            $capturedBody.credentialDetails.credentials.credentialType | Should -Be "WorkspaceIdentity"
+            $capturedBody.credentialDetails.credentials.PSObject.Properties.Name | Should -HaveCount 1
+        }
+
+        It "should send an update body carrying no service principal secret" {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
+                    return @{ value = @([pscustomobject]@{ displayName = "EDAP_DEV_fp__shared"; id = "fp-123" }) }
+                } elseif ($Splat.Method -eq "PATCH") {
+                    $script:capturedBody = $Splat.Body | ConvertFrom-Json
+                    return "updated"
+                }
+            }
+
+            Assert-PBIShareableCloudConnection -DisplayName "EDAP_DEV_fp__shared" `
+                -ConnectionType "FabricDataPipelines" `
+                -CredentialType "WorkspaceIdentity" `
+                -Parameters @() `
+                -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force) | Out-Null
+
+            $capturedBody.credentialDetails.credentials.credentialType | Should -Be "WorkspaceIdentity"
+            $capturedBody.credentialDetails.credentials.servicePrincipalSecret | Should -BeNullOrEmpty
+        }
+    }
 }

@@ -25,8 +25,14 @@ ConnectionType, which is correct for connectors where the two coincide (e.g. 'Az
 .PARAMETER Parameters
 A hashtable array containing additional parameters required for the connection.
 
+.PARAMETER CredentialType
+The type of credential the connection authenticates with. Supported unattended:
+'ServicePrincipal' (the default), 'WorkspaceIdentity' and 'Anonymous'. Credential types that
+require interactive consent ('OAuth2', 'Basic', 'Windows') are rejected with guidance.
+
 .PARAMETER ServicePrincipalClientId
-The client ID for the service principal used for authentication.
+The client ID for the service principal used for authentication. Only required when
+CredentialType is 'ServicePrincipal'.
 
 .PARAMETER ServicePrincipalSecret
 The secret for the service principal (typically provided as a secure string).
@@ -49,12 +55,16 @@ $body = _GenerateCreateBody -DisplayName "My Connection" `
 
 function _GenerateCreateBody
 {
+    # 'CredentialType' names which kind of credential to build, not a credential - the analyzer
+    # matches on the parameter name alone.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'CredentialType', Justification = 'Selects a credential type by name; holds no secret')]
     [CmdletBinding()]
     param (
         $DisplayName,
         $ConnectionType,
         $CreationMethod,
         $Parameters,
+        $CredentialType = 'ServicePrincipal',
         $ServicePrincipalClientId,
         $ServicePrincipalSecret,
         $TenantId
@@ -69,6 +79,12 @@ function _GenerateCreateBody
         $CreationMethod = $ConnectionType
     }
 
+    $credentials = _GenerateCredentialsBlock -DisplayName $DisplayName `
+                                             -CredentialType $CredentialType `
+                                             -ServicePrincipalClientId $ServicePrincipalClientId `
+                                             -ServicePrincipalSecret $ServicePrincipalSecret `
+                                             -TenantId $TenantId
+
     $createBody = @{
         connectivityType = "ShareableCloud"
         displayName = $DisplayName
@@ -82,12 +98,7 @@ function _GenerateCreateBody
             singleSignOnType = "None"
             connectionEncryption = "NotEncrypted"
             skipTestConnection = $false
-            credentials = @{
-            credentialType = "ServicePrincipal"
-            servicePrincipalClientId = $ServicePrincipalClientId
-            servicePrincipalSecret = $ServicePrincipalSecret
-            tenantId = $TenantId
-            }
+            credentials = $credentials
         }
     }
     

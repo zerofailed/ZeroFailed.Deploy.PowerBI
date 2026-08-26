@@ -97,6 +97,8 @@ function Resolve-CloudConnections {
                 # May be $null - defaulted to 'type' downstream, preserving the behaviour of
                 # configurations written before this field existed.
                 creationMethod = $conn.creationMethod
+                # Likewise defaulted to 'ServicePrincipal' downstream.
+                credentialType = $conn.credentialType
             }
 
             # Resolve service principal.
@@ -161,7 +163,10 @@ function Resolve-CloudConnections {
                 }
             }
             else {
-                $denormalized.target = $conn.target.parameters
+                # Settle the shape here rather than downstream: a connection with no parameters
+                # at all (FabricDataPipelines) must reach Assert-PBIShareableCloudConnection as
+                # an empty array, not $null.
+                $denormalized.target = $conn.target.parameters ?? @()
             }
 
             # Copy permissions

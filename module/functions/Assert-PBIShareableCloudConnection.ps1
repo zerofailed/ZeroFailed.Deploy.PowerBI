@@ -4,6 +4,9 @@
 
 function Assert-PBIShareableCloudConnection
 {
+    # 'CredentialType' names which kind of credential to use, not a credential - the analyzer
+    # matches on the parameter name alone.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'CredentialType', Justification = 'Selects a credential type by name; holds no secret')]
     [CmdletBinding()]
     [OutputType([System.Object])]
     param (
@@ -18,24 +21,49 @@ function Assert-PBIShareableCloudConnection
         [Parameter()]
         [string] $CreationMethod,
 
-        [Parameter(Mandatory=$true)]
-        [hashtable[]] $Parameters,
+        # AllowEmptyCollection is required, not cosmetic: a FabricDataPipelines connection has
+        # no parameters at all, and a mandatory [hashtable[]] rejects an empty array outright
+        # with "Cannot bind argument to parameter 'Parameters' because it is an empty array."
+        [Parameter()]
+        [AllowEmptyCollection()]
+        [hashtable[]] $Parameters = @(),
 
-        [Parameter(Mandatory=$true)]
+        # The credential types that carry no secret (WorkspaceIdentity, Anonymous) have no
+        # service principal, so none of the following three can be mandatory.
+        [Parameter()]
+        [string] $CredentialType = 'ServicePrincipal',
+
+        [Parameter()]
         [guid] $ServicePrincipalClientId,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter()]
         [securestring] $ServicePrincipalSecret,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter()]
         [string] $TenantId,
-        
+
         [Parameter(Mandatory=$true)]
         [securestring] $AccessToken,
 
         [Parameter()]
         [switch] $ContinueOnError
     )
+
+    # Only a ServicePrincipal connection has credentials to pass on. Adding these keys
+    # unconditionally would pipe a $null secret into ConvertFrom-SecureString, which fails with
+    # "Cannot bind argument to parameter 'SecureString' because it is null" and - under the
+    # build's $ErrorActionPreference of 'Stop' - is swallowed by the catch below, surfacing as a
+    # generic "Failed to process cloud connection".
+    $credentialSplat = @{
+        credentialType = $CredentialType
+    }
+    if ($CredentialType -eq 'ServicePrincipal') {
+        $credentialSplat += @{
+            servicePrincipalClientId = $ServicePrincipalClientId
+            servicePrincipalSecret = $ServicePrincipalSecret ? ($ServicePrincipalSecret | ConvertFrom-SecureString -AsPlainText) : $null
+            tenantId = $TenantId
+        }
+    }
 
     $splat = @{ 
         "Uri" = "https://api.fabric.microsoft.com/v1/connections" 
@@ -48,12 +76,7 @@ function Assert-PBIShareableCloudConnection
 
         if ($existingConnection) {
             Write-Information "Power BI shared cloud connection $DisplayName already exists"
-            $generateBodySplat = @{
-                servicePrincipalClientId = $ServicePrincipalClientId
-                servicePrincipalSecret = $ServicePrincipalSecret | ConvertFrom-SecureString -AsPlainText
-                tenantId = $TenantId
-            }
-            $updateBody = _GenerateUpdateBody @generateBodySplat
+            $updateBody = _GenerateUpdateBody @credentialSplat -DisplayName $DisplayName
             $splat = @{ 
                 "Uri" = "https://api.fabric.microsoft.com/v1/connections/$($existingConnection.id)" 
                 "Method" = "PATCH"
@@ -64,14 +87,11 @@ function Assert-PBIShareableCloudConnection
         } else {
             Write-Information "Connection does not exist"
             Write-Information "Creating Power BI shared cloud connection $DisplayName"
-            $generateBodySplat = @{
+            $generateBodySplat = $credentialSplat + @{
                 displayName = $DisplayName
                 connectionType = $ConnectionType
                 creationMethod = $CreationMethod
                 parameters = $Parameters
-                servicePrincipalClientId = $ServicePrincipalClientId
-                servicePrincipalSecret = $ServicePrincipalSecret | ConvertFrom-SecureString -AsPlainText
-                tenantId = $TenantId
             }
             $createBody = _GenerateCreateBody @generateBodySplat
             $splat = @{ 

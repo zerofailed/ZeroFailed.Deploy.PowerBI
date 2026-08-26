@@ -38,9 +38,23 @@ task deployPowerBISharedCloudConnection -After DeployCore {
 
     foreach ($connection in $cloudConnections) {
 
-        if (($connection | Get-Member -Name servicePrincipal) -and $connection.servicePrincipal.ContainsKey("secretUrl")) {
+        Write-Build Green "`nProcessing shared cloud connection: $($connection.displayName)"
 
-            Write-Build Green "`nProcessing shared cloud connection: $($connection.displayName)"
+        $secretValue = $null
+        $credentialType = $connection.credentialType ?? 'ServicePrincipal'
+
+        # Only a ServicePrincipal connection needs a secret looking up. WorkspaceIdentity and
+        # Anonymous connections carry none, and previously fell foul of a guard that wrapped
+        # this entire loop body with no else - so the task reported success having done nothing.
+        if ($credentialType -eq 'ServicePrincipal') {
+
+            if (-not ($connection | Get-Member -Name servicePrincipal) -or
+                -not $connection.servicePrincipal -or
+                -not $connection.servicePrincipal.ContainsKey("secretUrl")) {
+
+                Write-Warning "Skipping '$($connection.displayName)': credentialType is ServicePrincipal but no servicePrincipal with a secretUrl was resolved."
+                continue
+            }
 
             # Lookup the KV secret based on the available version of the module
             if ((Get-Module Az.KeyVault | Select-Object -ExpandProperty Version) -ge [Version]'6.3.0') {
@@ -61,62 +75,63 @@ task deployPowerBISharedCloudConnection -After DeployCore {
                 Write-Verbose "Args: $($splat | ConvertTo-Json -compress)"
                 $secretValue = Get-AzKeyVaultSecret @splat
             }
+        }
 
-            # Create or update the cloud connection
-            $splat = @{
-                DisplayName = $connection.displayName
-                ConnectionType = $connection.type
-                CreationMethod = $connection.creationMethod
-                Parameters = $connection.target
-                ServicePrincipalClientId = $connection.servicePrincipal.clientId
-                ServicePrincipalSecret = $secretValue.SecretValue
-                TenantId = $connection.servicePrincipal.tenantId
-                AccessToken = $token.Token
-                ContinueOnError = $PowerBiContinueOnError
-            }
+        # Create or update the cloud connection
+        $splat = @{
+            DisplayName = $connection.displayName
+            ConnectionType = $connection.type
+            CreationMethod = $connection.creationMethod
+            CredentialType = $credentialType
+            Parameters = $connection.target
+            ServicePrincipalClientId = $connection.servicePrincipal.clientId
+            ServicePrincipalSecret = $secretValue.SecretValue
+            TenantId = $connection.servicePrincipal.tenantId
+            AccessToken = $token.Token
+            ContinueOnError = $PowerBiContinueOnError
+        }
 
-            Write-Build White "Configuring cloud connection..."
-            $connectionResult = Assert-PBIShareableCloudConnection @splat
-            if ($connectionResult) {
-                Write-Build Green "✅ Cloud connection configured [Id=$($connectionResult.Id)]"
+        Write-Build White "Configuring cloud connection..."
+        $connectionResult = Assert-PBIShareableCloudConnection @splat
+        if ($connectionResult) {
+            Write-Build Green "✅ Cloud connection configured [Id=$($connectionResult.Id)]"
 
-                # Manage permissions if specified
-                if ($connection.permissions) {
-                    Write-Build White "Processing permissions..."
-                    
-                    try {
-                        $permissionResult = Assert-PBICloudConnectionPermissionGroups `
-                                                -CloudConnectionId $connectionResult.id `
-                                                -PermissionGroups $connection.permissions `
-                                                -AccessToken $token.Token `
-                                                -GraphAccessToken $graphToken.Token `
-                                                -StrictMode `
-                                                -DryRun:$PowerBiDryRunMode `
-                                                -ContinueOnError:$PowerBiContinueOnError
+            # Manage permissions if specified
+            if ($connection.permissions) {
+                Write-Build White "Processing permissions..."
+                
+                try {
+                    $permissionResult = Assert-PBICloudConnectionPermissionGroups `
+                                            -CloudConnectionId $connectionResult.id `
+                                            -PermissionGroups $connection.permissions `
+                                            -AccessToken $token.Token `
+                                            -GraphAccessToken $graphToken.Token `
+                                            -StrictMode `
+                                            -DryRun:$PowerBiDryRunMode `
+                                            -ContinueOnError:$PowerBiContinueOnError
 
 
-                        if ($permissionResult.Success) {
-                            Write-Build Green "✅ Cloud connection permissions synchronized"
-                            Write-Build White "  - Identities resolved: $($permissionResult.Summary.TotalIdentitiesResolved)"
-                            Write-Build White "  - Permissions added: $($permissionResult.Summary.PermissionsAdded)"
-                            Write-Build White "  - Permissions updated: $($permissionResult.Summary.PermissionsUpdated)"
-                            Write-Build White "  - Permissions removed: $($permissionResult.Summary.PermissionsRemoved)"
-                        } else {
-                            Write-Warning "Permission synchronization completed with errors for connection: $($connection.displayName)"
-                            foreach ($permissionError in $permissionResult.Errors) {
-                                Write-Warning "  - $permissionError"
-                            }
+                    if ($permissionResult.Success) {
+                        Write-Build Green "✅ Cloud connection permissions synchronized"
+                        Write-Build White "  - Identities resolved: $($permissionResult.Summary.TotalIdentitiesResolved)"
+                        Write-Build White "  - Permissions added: $($permissionResult.Summary.PermissionsAdded)"
+                        Write-Build White "  - Permissions updated: $($permissionResult.Summary.PermissionsUpdated)"
+                        Write-Build White "  - Permissions removed: $($permissionResult.Summary.PermissionsRemoved)"
+                    } else {
+                        Write-Warning "Permission synchronization completed with errors for connection: $($connection.displayName)"
+                        foreach ($permissionError in $permissionResult.Errors) {
+                            Write-Warning "  - $permissionError"
                         }
-                    } catch {
-                        if (!$_.Exception.WasThrownFromThrowStatement) {
-                            # Only log the stack trace for any unhandled exceptions, as we assume thrown exceptions will have done this already
-                            Write-Verbose "Exception Stack Trace: $($_.ScriptStackTrace)" -Verbose
-                        }
-                        throw "Failed to manage permissions for connection $($connection.displayName): $($_.Exception.Message)"     
                     }
-                } else {
-                    Write-Build White "No permissions specified for connection: $($connection.displayName)"
+                } catch {
+                    if (!$_.Exception.WasThrownFromThrowStatement) {
+                        # Only log the stack trace for any unhandled exceptions, as we assume thrown exceptions will have done this already
+                        Write-Verbose "Exception Stack Trace: $($_.ScriptStackTrace)" -Verbose
+                    }
+                    throw "Failed to manage permissions for connection $($connection.displayName): $($_.Exception.Message)"     
                 }
+            } else {
+                Write-Build White "No permissions specified for connection: $($connection.displayName)"
             }
         }
     }
