@@ -2,6 +2,82 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
+<#
+.SYNOPSIS
+Creates or updates a shareable cloud connection, converging it on its declared configuration.
+
+.DESCRIPTION
+Looks the connection up by display name and either creates it or re-asserts its credential.
+
+The credential block is built to match the connection's declared credential type, so that
+connections carrying no secret at all - WorkspaceIdentity and Anonymous - are supported
+alongside service principal ones. Those two need no ServicePrincipalClientId,
+ServicePrincipalSecret or TenantId, and typically no Parameters either.
+
+ConnectionType is the connector kind; CreationMethod is the Power Query function that builds
+it. They coincide for AzureBlobs and SQL, and differ for SharePoint (built by SharePointList)
+and Fabric pipelines (built by FabricDataPipelines.Actions). CreationMethod defaults to
+ConnectionType when omitted.
+
+Set AllowCredentialUpdate to false for any connection that OneLake shortcuts are bound to.
+Updating such a connection leaves every bound shortcut failing '401 Unauthorized on ListBlob'
+while still reporting healthy, and delete-and-recreate does not reliably recover it. The
+default of true preserves the Key Vault secret rotation flow.
+
+.PARAMETER DisplayName
+The display name of the connection.
+
+.PARAMETER ConnectionType
+The connector kind, such as AzureBlobs, SQL or SharePoint.
+
+.PARAMETER CreationMethod
+The Power Query function that builds the connection.
+
+.PARAMETER Parameters
+The connection's target parameters, which may be empty.
+
+.PARAMETER CredentialType
+ServicePrincipal, WorkspaceIdentity or Anonymous.
+
+.PARAMETER ServicePrincipalClientId
+The client ID of the service principal.
+
+.PARAMETER ServicePrincipalSecret
+The secret of the service principal.
+
+.PARAMETER TenantId
+The tenant ID of the service principal.
+
+.PARAMETER AccessToken
+A Fabric API access token.
+
+.PARAMETER AllowCredentialUpdate
+Whether an existing connection may have its credential re-asserted.
+
+.PARAMETER SkipCredentialUpdates
+Suppresses credential updates for this run whatever each connection allows.
+
+.PARAMETER ValidateConnectionType
+Checks the connection definition against the tenant before attempting a create.
+
+.PARAMETER ContinueOnError
+Logs an error and returns null rather than aborting the whole deployment.
+
+.OUTPUTS
+System.Object
+
+.NOTES
+Returns the created, updated or existing connection, or $null when processing failed and
+ContinueOnError was set.
+
+.EXAMPLE
+Assert-PBIShareableCloudConnection -DisplayName 'EDAP_DEV_fp__shared' -ConnectionType 'FabricDataPipelines' -CreationMethod 'FabricDataPipelines.Actions' -CredentialType 'WorkspaceIdentity' -Parameters @() -AccessToken $token
+# Creates a connection that carries no secret and no parameters.
+
+.LINK
+https://learn.microsoft.com/en-us/rest/api/fabric/core/connections/create-connection
+#>
+
 function Assert-PBIShareableCloudConnection
 {
     # 'CredentialType' names which kind of credential to use, not a credential - the analyzer
