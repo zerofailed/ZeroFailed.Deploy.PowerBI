@@ -94,6 +94,9 @@ function Resolve-CloudConnections {
             $denormalized = @{
                 displayName = $conn.displayName
                 type = $conn.type
+                # May be $null - defaulted to 'type' downstream, preserving the behaviour of
+                # configurations written before this field existed.
+                creationMethod = $conn.creationMethod
             }
 
             # Resolve service principal.

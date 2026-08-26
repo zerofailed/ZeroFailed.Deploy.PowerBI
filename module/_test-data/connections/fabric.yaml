@@ -2,13 +2,15 @@
 #
 # These two connections are the acceptance fixtures for the Fabric connection work - see
 # docs/implementation_plan.md. Between them they exercise every capability the extension
-# previously lacked, starting with a connection that declares no service principal at all.
+# previously lacked: a creation method that differs from the type, and a connection that
+# declares no service principal at all.
 version: '1.0'
 
 cloudConnections:
   # Backs a OneLake shortcut onto a SharePoint document library.
   - displayName: EDAP_DEV_sp__hat
     type: SharePoint
+    creationMethod: SharePointList
     useServicePrincipal: development
     target:
       parameters:
@@ -23,6 +25,7 @@ cloudConnections:
   # Required by every InvokePipeline activity. No secret, no parameters, no service principal.
   - displayName: EDAP_DEV_fp__shared
     type: FabricDataPipelines
+    creationMethod: FabricDataPipelines.Actions
     target:
       parameters: []
     permissions:

@@ -15,7 +15,12 @@ for API consumption.
 The display name for the connection.
 
 .PARAMETER ConnectionType
-Specifies the type of the connection which is also used as the creation method.
+Specifies the connector kind for the connection (e.g. 'AzureBlobs', 'SQL', 'SharePoint').
+
+.PARAMETER CreationMethod
+Specifies the Power Query function used to build the connection. When omitted it defaults to
+ConnectionType, which is correct for connectors where the two coincide (e.g. 'AzureBlobs',
+'SQL') but not for those where they differ (e.g. 'SharePoint'/'SharePointList').
 
 .PARAMETER Parameters
 A hashtable array containing additional parameters required for the connection.
@@ -42,24 +47,34 @@ $body = _GenerateCreateBody -DisplayName "My Connection" `
 # This example returns a hashtable with the connection details ready to be converted to JSON.
 #>
 
-function _GenerateCreateBody 
+function _GenerateCreateBody
 {
     [CmdletBinding()]
     param (
         $DisplayName,
         $ConnectionType,
+        $CreationMethod,
         $Parameters,
         $ServicePrincipalClientId,
         $ServicePrincipalSecret,
         $TenantId
     )
 
+    # 'type' is the connector kind; 'creationMethod' is the Power Query function that builds it.
+    # They coincide for SQL and AzureBlobs, and differ for SharePoint (SharePoint/SharePointList)
+    # and Fabric pipelines (FabricDataPipelines/FabricDataPipelines.Actions). Supplying a valid
+    # type with an invalid creation method returns "No function found matching 'X' for Kind: 'X'",
+    # which reads as though the type is wrong and sends you looking at the one thing that was right.
+    if ([string]::IsNullOrEmpty($CreationMethod)) {
+        $CreationMethod = $ConnectionType
+    }
+
     $createBody = @{
         connectivityType = "ShareableCloud"
         displayName = $DisplayName
         connectionDetails = @{
             type = $ConnectionType
-            creationMethod = $ConnectionType
+            creationMethod = $CreationMethod
             parameters = $Parameters
         }
         privacyLevel = "Organizational"

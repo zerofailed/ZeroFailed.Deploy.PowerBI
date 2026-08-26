@@ -13,6 +13,11 @@ function Assert-PBIShareableCloudConnection
         [Parameter(Mandatory=$true)]
         [string] $ConnectionType,
 
+        # The Power Query function used to build the connection. Defaults to $ConnectionType
+        # when not supplied, which is correct only where the two coincide.
+        [Parameter()]
+        [string] $CreationMethod,
+
         [Parameter(Mandatory=$true)]
         [hashtable[]] $Parameters,
 
@@ -62,6 +67,7 @@ function Assert-PBIShareableCloudConnection
             $generateBodySplat = @{
                 displayName = $DisplayName
                 connectionType = $ConnectionType
+                creationMethod = $CreationMethod
                 parameters = $Parameters
                 servicePrincipalClientId = $ServicePrincipalClientId
                 servicePrincipalSecret = $ServicePrincipalSecret | ConvertFrom-SecureString -AsPlainText

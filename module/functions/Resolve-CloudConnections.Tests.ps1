@@ -74,6 +74,25 @@ Describe 'Resolve-CloudConnections' {
         }
     }
 
+    Context 'When a connection declares a creation method' {
+
+        It 'Should denormalize it alongside the type' {
+            $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'EDAP_DEV_sp__hat'
+
+            $connection.type | Should -Be 'SharePoint'
+            $connection.creationMethod | Should -Be 'SharePointList'
+        }
+
+        It 'Should leave the creation method unset when the connection does not declare one' {
+            # Defaulted to the type downstream, so that configurations written before this
+            # field existed keep producing the body they always did.
+            $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'Development Blob Storage'
+
+            $connection.type | Should -Be 'AzureBlobs'
+            $connection.creationMethod | Should -BeNullOrEmpty
+        }
+    }
+
     Context 'When a connection declares no service principal' {
         # Credential types such as WorkspaceIdentity and Anonymous carry no principal and no
         # tenant. Previously the default-tenant assignment ran unconditionally and threw
