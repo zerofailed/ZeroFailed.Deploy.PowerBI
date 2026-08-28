@@ -23,7 +23,7 @@ Ensures that the specified Power BI shareable cloud connection exists.
 Assert-PBIShareableCloudConnection [-DisplayName] <string> [-ConnectionType] <string>
  [-Parameters] <hashtable[]> [-ServicePrincipalClientId] <guid>
  [-ServicePrincipalSecret] <securestring> [-TenantId] <string> [-AccessToken] <securestring>
- [-ContinueOnError] [<CommonParameters>]
+ [-CreationMethod <string>] [-ContinueOnError] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -104,6 +104,29 @@ Switch to continue applying permission changes even if some operations fail.
 ```yaml
 Type: System.Management.Automation.SwitchParameter
 DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -CreationMethod
+
+The creation method to use when provisioning the connection. Some connection types require a
+creation method that differs from the connection type itself (e.g. CommonDataService requires
+'CommonDataService.Database'). Defaults to the value of ConnectionType when not specified.
+
+```yaml
+Type: System.String
+DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:

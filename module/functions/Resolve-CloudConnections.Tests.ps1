@@ -35,6 +35,7 @@ Describe 'Resolve-CloudConnections' {
             $devConnection = $results | Where-Object { $_.displayName -eq 'Development Blob Storage' }
             $devConnection | Should -Not -BeNullOrEmpty
             $devConnection.type | Should -Be 'AzureBlobs'
+            $devConnection.creationMethod | Should -BeNullOrEmpty
             $devConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
             $devConnection.target | Where-Object { $_.name -eq 'domain' } | Select-Object -ExpandProperty value | Should -Be 'blob.core.windows.net'
             $devConnection.permissions.owners | Should -Contain 'fabricadm@contoso.com'
@@ -71,6 +72,13 @@ Describe 'Resolve-CloudConnections' {
             $sqlConnection | Should -Not -BeNullOrEmpty
             $sqlConnection.type | Should -Be 'SQL'
             $sqlConnection.servicePrincipal.tenantId | Should -Be '00000000-0000-0000-0000-000000000000'
+        }
+
+        It "Should pass through an explicitly specified creation method" {
+            $backupConnection = $results | Where-Object { $_.displayName -eq 'Backup Blob Storage' }
+            $backupConnection | Should -Not -BeNullOrEmpty
+            $backupConnection.type | Should -Be 'AzureBlobs'
+            $backupConnection.creationMethod | Should -Be 'AzureBlobs.Custom'
         }
     }
 

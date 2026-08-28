@@ -15,7 +15,12 @@ for API consumption.
 The display name for the connection.
 
 .PARAMETER ConnectionType
-Specifies the type of the connection which is also used as the creation method.
+Specifies the type of the connection which is also used as the creation method by default.
+
+.PARAMETER CreationMethod
+Specifies the creation method to use when provisioning the connection. Some connection types
+require a creation method that differs from the connection type itself (e.g. CommonDataService
+requires 'CommonDataService.Database'). Defaults to the value of ConnectionType when not specified.
 
 .PARAMETER Parameters
 A hashtable array containing additional parameters required for the connection.
@@ -48,18 +53,23 @@ function _GenerateCreateBody
     param (
         $DisplayName,
         $ConnectionType,
+        $CreationMethod,
         $Parameters,
         $ServicePrincipalClientId,
         $ServicePrincipalSecret,
         $TenantId
     )
 
+    if ([string]::IsNullOrEmpty($CreationMethod)) {
+        $CreationMethod = $ConnectionType
+    }
+
     $createBody = @{
         connectivityType = "ShareableCloud"
         displayName = $DisplayName
         connectionDetails = @{
             type = $ConnectionType
-            creationMethod = $ConnectionType
+            creationMethod = $CreationMethod
             parameters = $Parameters
         }
         privacyLevel = "Organizational"

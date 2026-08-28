@@ -29,6 +29,9 @@ function Assert-PBIShareableCloudConnection
         [securestring] $AccessToken,
 
         [Parameter()]
+        [string] $CreationMethod,
+
+        [Parameter()]
         [switch] $ContinueOnError
     )
 
@@ -62,6 +65,7 @@ function Assert-PBIShareableCloudConnection
             $generateBodySplat = @{
                 displayName = $DisplayName
                 connectionType = $ConnectionType
+                creationMethod = $CreationMethod
                 parameters = $Parameters
                 servicePrincipalClientId = $ServicePrincipalClientId
                 servicePrincipalSecret = $ServicePrincipalSecret | ConvertFrom-SecureString -AsPlainText

@@ -94,6 +94,7 @@ function Resolve-CloudConnections {
             $denormalized = @{
                 displayName = $conn.displayName
                 type = $conn.type
+                creationMethod = $conn.creationMethod
             }
 
             # Resolve service principal
