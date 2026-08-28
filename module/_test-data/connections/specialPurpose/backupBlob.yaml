@@ -5,6 +5,7 @@ cloudConnections:
   # Backup storage using dev target
   - displayName: Backup Blob Storage
     type: AzureBlobs
+    creationMethod: AzureBlobs.Custom
     servicePrincipal:
       clientId: 00000000-0000-0000-0000-000000000000
       secretUrl: https://mykeyvault.vault.azure.net/secrets/backup-secret/

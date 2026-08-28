@@ -66,6 +66,7 @@ task deployPowerBISharedCloudConnection -After DeployCore {
             $splat = @{
                 DisplayName = $connection.displayName
                 ConnectionType = $connection.type
+                CreationMethod = $connection.creationMethod
                 Parameters = $connection.target
                 ServicePrincipalClientId = $connection.servicePrincipal.clientId
                 ServicePrincipalSecret = $secretValue.SecretValue

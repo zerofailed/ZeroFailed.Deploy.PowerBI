@@ -98,6 +98,7 @@ graph TD
       - `cloudConnections`: List of connections.
         - `displayName`: Connection name.
         - `type`: Connection type (e.g., `AzureBlobs`, `SQL`).
+        - `creationMethod` (optional): The creation method to use when provisioning the connection. Defaults to `type` when omitted. Only needed when the Fabric API's creation method differs from the type (e.g. `CommonDataService` requires `CommonDataService.Database` - see the `ListSupportedConnectionTypes` API for the expected value).
         - `useServicePrincipal`: Reference to a service principal.
         - `target`: Reference to a connection target.
         - `permissions`: Defines `owners`, `users`, and `reshareUsers`.
