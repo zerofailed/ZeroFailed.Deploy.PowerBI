@@ -4,7 +4,7 @@ external help file: ZeroFailed.Deploy.PowerBI-Help.xml
 HelpUri: ''
 Locale: en-GB
 Module Name: ZeroFailed.Deploy.PowerBI
-ms.date: 08/26/2026
+ms.date: 09/02/2026
 PlatyPS schema version: 2024-05-01
 title: Assert-PBICloudConnectionPermissions
 ---

@@ -95,6 +95,32 @@ Describe "Assert-PBIShareableCloudConnection" {
             Should -Invoke _GenerateCreateBody -Times 1
             Should -Invoke _GenerateUpdateBody -Times 0
         }
+
+        It "should pass an explicitly specified creation method through to _GenerateCreateBody" {
+            Mock -CommandName Invoke-RestMethodWithRateLimit -MockWith {
+                if ($Splat.Method -eq "GET") {
+                    return @{ value = @() }
+                } elseif ($Splat.Method -eq "POST") {
+                    return "created"
+                }
+            }
+
+            Mock _GenerateCreateBody -MockWith {return @{}}
+            Mock _GenerateUpdateBody -MockWith {return @{}}
+
+            # Act
+            Assert-PBIShareableCloudConnection -DisplayName "NewConnection" `
+                -ConnectionType "CommonDataService" `
+                -CreationMethod "CommonDataService.Database" `
+                -Parameters @{} `
+                -ServicePrincipalClientId "e795e7b2-a973-436c-a55e-cb06a2fcd68e" `
+                -ServicePrincipalSecret (ConvertTo-SecureString "secret" -AsPlainText -Force) `
+                -TenantId "tenant" `
+                -AccessToken (ConvertTo-SecureString "token" -AsPlainText -Force)
+
+            # Assert
+            Should -Invoke _GenerateCreateBody -Times 1 -ParameterFilter { $creationMethod -eq "CommonDataService.Database" }
+        }
     }
 
     Context "When credential updates are suppressed" {

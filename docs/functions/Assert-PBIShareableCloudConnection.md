@@ -4,7 +4,7 @@ external help file: ZeroFailed.Deploy.PowerBI-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/fabric/core/connections/create-connection
 Locale: en-GB
 Module Name: ZeroFailed.Deploy.PowerBI
-ms.date: 08/26/2026
+ms.date: 09/02/2026
 PlatyPS schema version: 2024-05-01
 title: Assert-PBIShareableCloudConnection
 ---
@@ -146,6 +146,10 @@ HelpMessage: ''
 
 ### -CreationMethod
 
+The creation method to use when provisioning the connection. Some connection types require a
+creation method that differs from the connection type itself (e.g. CommonDataService requires
+'CommonDataService.Database'). Defaults to the value of ConnectionType when not specified.
+The Power Query function that builds the connection.
 The Power Query function that builds the connection.
 
 ```yaml
