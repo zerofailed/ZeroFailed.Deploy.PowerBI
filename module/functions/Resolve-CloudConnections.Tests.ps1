@@ -29,7 +29,7 @@ Describe 'Resolve-CloudConnections' {
 
         It 'Should return denormalized connections' {
             # Verify number of connections
-            $results.Count | Should -Be 7
+            $results.Count | Should -Be 9
 
             # Verify development connection properties
             $devConnection = $results | Where-Object { $_.displayName -eq 'Development Blob Storage' }
@@ -82,10 +82,70 @@ Describe 'Resolve-CloudConnections' {
         }
     }
 
+    Context 'When a connection declares a creation method' {
+
+        It 'Should denormalize it alongside the type' {
+            $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'EDAP_DEV_sp__hat'
+
+            $connection.type | Should -Be 'SharePoint'
+            $connection.creationMethod | Should -Be 'SharePointList'
+        }
+
+        It 'Should leave the creation method unset when the connection does not declare one' {
+            # Defaulted to the type downstream, so that configurations written before this
+            # field existed keep producing the body they always did.
+            $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'Development Blob Storage'
+
+            $connection.type | Should -Be 'AzureBlobs'
+            $connection.creationMethod | Should -BeNullOrEmpty
+        }
+    }
+
+    Context 'When a connection opts out of credential updates' {
+
+        It 'Should carry the opt-out through denormalization' {
+            $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'EDAP_DEV_sp__hat'
+
+            $connection.credentialType | Should -Be 'ServicePrincipal'
+            $connection.allowCredentialUpdate | Should -BeFalse
+        }
+
+        It 'Should default to allowing updates when the connection says nothing' {
+            # Preserves today's behaviour, and with it the Key Vault secret rotation flow.
+            $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'Development Blob Storage'
+
+            $connection.allowCredentialUpdate | Should -BeTrue
+        }
+    }
+
+    Context 'When a connection declares no service principal' {
+        # Credential types such as WorkspaceIdentity and Anonymous carry no principal and no
+        # tenant. Previously the default-tenant assignment ran unconditionally and threw
+        # "You cannot call a method on a null-valued expression", aborting the whole deployment
+        # with an error naming neither the connection nor the field.
+
+        It 'Should resolve without throwing' {
+            { Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'EDAP_DEV_fp__shared' } |
+                Should -Not -Throw
+        }
+
+        It 'Should not carry a service principal' {
+            $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'EDAP_DEV_fp__shared'
+            $connection.displayName | Should -Be 'EDAP_DEV_fp__shared'
+            $connection.servicePrincipal | Should -BeNullOrEmpty
+        }
+
+        It 'Should still apply the default tenant ID to a connection that does have one' {
+            $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'EDAP_DEV_sp__hat'
+            $connection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
+            $connection.servicePrincipal.tenantId | Should -Be '00000000-0000-0000-0000-000000000001'
+        }
+    }
+
     Context 'When given a partial configuration path' {
         It 'Should try using a default-named configuration file' {
             $results = Resolve-CloudConnections -ConfigPath $testDataDir
-            $results.Count | Should -Be 7
+            $results.Count | Should -Be 9
         }
     }
 
@@ -116,7 +176,7 @@ Describe 'Resolve-CloudConnections' {
 
         It 'Should process all connections when no filter is provided' {
             $connections = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml"
-            $connections.Count | Should -Be 7
+            $connections.Count | Should -Be 9
         }
 
         It 'Should log a warning when no connections match the filter' {

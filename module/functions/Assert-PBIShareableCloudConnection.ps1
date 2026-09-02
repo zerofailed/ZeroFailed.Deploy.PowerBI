@@ -2,8 +2,87 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
+<#
+.SYNOPSIS
+Creates or updates a shareable cloud connection, converging it on its declared configuration.
+
+.DESCRIPTION
+Looks the connection up by display name and either creates it or re-asserts its credential.
+
+The credential block is built to match the connection's declared credential type, so that
+connections carrying no secret at all - WorkspaceIdentity and Anonymous - are supported
+alongside service principal ones. Those two need no ServicePrincipalClientId,
+ServicePrincipalSecret or TenantId, and typically no Parameters either.
+
+ConnectionType is the connector kind; CreationMethod is the Power Query function that builds
+it. They coincide for AzureBlobs and SQL, and differ for SharePoint (built by SharePointList)
+and Fabric pipelines (built by FabricDataPipelines.Actions). CreationMethod defaults to
+ConnectionType when omitted.
+
+Set AllowCredentialUpdate to false for any connection that OneLake shortcuts are bound to.
+Updating such a connection leaves every bound shortcut failing '401 Unauthorized on ListBlob'
+while still reporting healthy, and delete-and-recreate does not reliably recover it. The
+default of true preserves the Key Vault secret rotation flow.
+
+.PARAMETER DisplayName
+The display name of the connection.
+
+.PARAMETER ConnectionType
+The connector kind, such as AzureBlobs, SQL or SharePoint.
+
+.PARAMETER CreationMethod
+The Power Query function that builds the connection.
+
+.PARAMETER Parameters
+The connection's target parameters, which may be empty.
+
+.PARAMETER CredentialType
+ServicePrincipal, WorkspaceIdentity or Anonymous.
+
+.PARAMETER ServicePrincipalClientId
+The client ID of the service principal.
+
+.PARAMETER ServicePrincipalSecret
+The secret of the service principal.
+
+.PARAMETER TenantId
+The tenant ID of the service principal.
+
+.PARAMETER AccessToken
+A Fabric API access token.
+
+.PARAMETER AllowCredentialUpdate
+Whether an existing connection may have its credential re-asserted.
+
+.PARAMETER SkipCredentialUpdates
+Suppresses credential updates for this run whatever each connection allows.
+
+.PARAMETER ValidateConnectionType
+Checks the connection definition against the tenant before attempting a create.
+
+.PARAMETER ContinueOnError
+Logs an error and returns null rather than aborting the whole deployment.
+
+.OUTPUTS
+System.Object
+
+.NOTES
+Returns the created, updated or existing connection, or $null when processing failed and
+ContinueOnError was set.
+
+.EXAMPLE
+Assert-PBIShareableCloudConnection -DisplayName 'EDAP_DEV_fp__shared' -ConnectionType 'FabricDataPipelines' -CreationMethod 'FabricDataPipelines.Actions' -CredentialType 'WorkspaceIdentity' -Parameters @() -AccessToken $token
+# Creates a connection that carries no secret and no parameters.
+
+.LINK
+https://learn.microsoft.com/en-us/rest/api/fabric/core/connections/create-connection
+#>
+
 function Assert-PBIShareableCloudConnection
 {
+    # 'CredentialType' names which kind of credential to use, not a credential - the analyzer
+    # matches on the parameter name alone.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'CredentialType', Justification = 'Selects a credential type by name; holds no secret')]
     [CmdletBinding()]
     [OutputType([System.Object])]
     param (
@@ -13,45 +92,95 @@ function Assert-PBIShareableCloudConnection
         [Parameter(Mandatory=$true)]
         [string] $ConnectionType,
 
-        [Parameter(Mandatory=$true)]
-        [hashtable[]] $Parameters,
+        # The Power Query function used to build the connection. Defaults to $ConnectionType
+        # when not supplied, which is correct only where the two coincide.
+        [Parameter()]
+        [string] $CreationMethod,
 
-        [Parameter(Mandatory=$true)]
+        # AllowEmptyCollection is required, not cosmetic: a FabricDataPipelines connection has
+        # no parameters at all, and a mandatory [hashtable[]] rejects an empty array outright
+        # with "Cannot bind argument to parameter 'Parameters' because it is an empty array."
+        [Parameter()]
+        [AllowEmptyCollection()]
+        [hashtable[]] $Parameters = @(),
+
+        # The credential types that carry no secret (WorkspaceIdentity, Anonymous) have no
+        # service principal, so none of the following three can be mandatory.
+        [Parameter()]
+        [string] $CredentialType = 'ServicePrincipal',
+
+        [Parameter()]
         [guid] $ServicePrincipalClientId,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter()]
         [securestring] $ServicePrincipalSecret,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter()]
         [string] $TenantId,
-        
+
         [Parameter(Mandatory=$true)]
         [securestring] $AccessToken,
 
+        # [bool] rather than [switch], deliberately: 'false' has to be expressible from YAML.
+        # Defaults to true, which preserves both today's behaviour and the Key Vault secret
+        # rotation flow that depends on it.
         [Parameter()]
-        [string] $CreationMethod,
+        [bool] $AllowCredentialUpdate = $true,
+
+        # Run-level override, for converging structure without touching any credential.
+        [Parameter()]
+        [switch] $SkipCredentialUpdates,
+
+        # Checks the type, creation method and credential type against the tenant before
+        # attempting a create. Improves diagnosis rather than enabling anything, so it is opt-in
+        # at this level; the task turns it on by default.
+        [Parameter()]
+        [switch] $ValidateConnectionType,
 
         [Parameter()]
         [switch] $ContinueOnError
     )
 
-    $splat = @{ 
-        "Uri" = "https://api.fabric.microsoft.com/v1/connections" 
-        "Method" = "GET"
-        "Headers" = @{Authorization = "Bearer $($AccessToken | ConvertFrom-SecureString -AsPlainText)"; 'Content-type' = 'application/json'}
+    # Only a ServicePrincipal connection has credentials to pass on. Adding these keys
+    # unconditionally would pipe a $null secret into ConvertFrom-SecureString, which fails with
+    # "Cannot bind argument to parameter 'SecureString' because it is null" and - under the
+    # build's $ErrorActionPreference of 'Stop' - is swallowed by the catch below, surfacing as a
+    # generic "Failed to process cloud connection".
+    $credentialSplat = @{
+        credentialType = $CredentialType
+    }
+    if ($CredentialType -eq 'ServicePrincipal') {
+        $credentialSplat += @{
+            servicePrincipalClientId = $ServicePrincipalClientId
+            servicePrincipalSecret = $ServicePrincipalSecret ? ($ServicePrincipalSecret | ConvertFrom-SecureString -AsPlainText) : $null
+            tenantId = $TenantId
+        }
     }
 
     try {
-        $existingConnection = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue | Select-Object -ExpandProperty value | Where-Object {$_.displayName -eq $DisplayName}
+        # Paged: a connection on a later page would otherwise look absent, and the create that
+        # followed would fail on a duplicate display name.
+        $existingConnection = _Get-CloudConnectionList -AccessToken $AccessToken |
+                                Where-Object { $_.displayName -eq $DisplayName } |
+                                Select-Object -First 1
 
         if ($existingConnection) {
             Write-Information "Power BI shared cloud connection $DisplayName already exists"
-            $generateBodySplat = @{
-                servicePrincipalClientId = $ServicePrincipalClientId
-                servicePrincipalSecret = $ServicePrincipalSecret | ConvertFrom-SecureString -AsPlainText
-                tenantId = $TenantId
+
+            if ($SkipCredentialUpdates -or -not $AllowCredentialUpdate) {
+                # Updating a connection is not a safe no-op when anything is BOUND to it.
+                # Creating a OneLake shortcut binds it to a cloud connection; changing that
+                # connection leaves the binding stale, every read then fails
+                # '401 Unauthorized on ListBlob', the shortcut still reports healthy in a
+                # list_shortcuts response, and delete-and-recreate does not reliably recover it.
+                # Verified against a live tenant on 2026-08-20 - it cost a day of downtime.
+                # The extension cannot know a shortcut exists, which is why this decision lives
+                # in the connection's own configuration.
+                Write-Information "Connection '$DisplayName' already exists - credential updates are disabled for it, leaving it untouched."
+                return $existingConnection
             }
-            $updateBody = _GenerateUpdateBody @generateBodySplat
+
+            $updateBody = _GenerateUpdateBody @credentialSplat -DisplayName $DisplayName
             $splat = @{ 
                 "Uri" = "https://api.fabric.microsoft.com/v1/connections/$($existingConnection.id)" 
                 "Method" = "PATCH"
@@ -61,15 +190,23 @@ function Assert-PBIShareableCloudConnection
             $response = Invoke-RestMethodWithRateLimit -Splat $splat -InformationAction Continue
         } else {
             Write-Information "Connection does not exist"
+
+            if ($ValidateConnectionType) {
+                # Only worth doing on the create path: an existing connection was already
+                # accepted by the tenant.
+                _Assert-ValidConnectionType -ConnectionType $ConnectionType `
+                                            -CreationMethod $CreationMethod `
+                                            -CredentialType $CredentialType `
+                                            -DisplayName $DisplayName `
+                                            -AccessToken $AccessToken
+            }
+
             Write-Information "Creating Power BI shared cloud connection $DisplayName"
-            $generateBodySplat = @{
+            $generateBodySplat = $credentialSplat + @{
                 displayName = $DisplayName
                 connectionType = $ConnectionType
                 creationMethod = $CreationMethod
                 parameters = $Parameters
-                servicePrincipalClientId = $ServicePrincipalClientId
-                servicePrincipalSecret = $ServicePrincipalSecret | ConvertFrom-SecureString -AsPlainText
-                tenantId = $TenantId
             }
             $createBody = _GenerateCreateBody @generateBodySplat
             $splat = @{ 

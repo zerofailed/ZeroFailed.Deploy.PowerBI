@@ -15,18 +15,24 @@ for API consumption.
 The display name for the connection.
 
 .PARAMETER ConnectionType
-Specifies the type of the connection which is also used as the creation method by default.
+Specifies the connector kind for the connection (e.g. 'AzureBlobs', 'SQL', 'SharePoint').
 
 .PARAMETER CreationMethod
-Specifies the creation method to use when provisioning the connection. Some connection types
-require a creation method that differs from the connection type itself (e.g. CommonDataService
-requires 'CommonDataService.Database'). Defaults to the value of ConnectionType when not specified.
+Specifies the Power Query function used to build the connection. When omitted it defaults to
+ConnectionType, which is correct for connectors where the two coincide (e.g. 'AzureBlobs',
+'SQL') but not for those where they differ (e.g. 'SharePoint'/'SharePointList').
 
 .PARAMETER Parameters
 A hashtable array containing additional parameters required for the connection.
 
+.PARAMETER CredentialType
+The type of credential the connection authenticates with. Supported unattended:
+'ServicePrincipal' (the default), 'WorkspaceIdentity' and 'Anonymous'. Credential types that
+require interactive consent ('OAuth2', 'Basic', 'Windows') are rejected with guidance.
+
 .PARAMETER ServicePrincipalClientId
-The client ID for the service principal used for authentication.
+The client ID for the service principal used for authentication. Only required when
+CredentialType is 'ServicePrincipal'.
 
 .PARAMETER ServicePrincipalSecret
 The secret for the service principal (typically provided as a secure string).
@@ -47,22 +53,37 @@ $body = _GenerateCreateBody -DisplayName "My Connection" `
 # This example returns a hashtable with the connection details ready to be converted to JSON.
 #>
 
-function _GenerateCreateBody 
+function _GenerateCreateBody
 {
+    # 'CredentialType' names which kind of credential to build, not a credential - the analyzer
+    # matches on the parameter name alone.
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'CredentialType', Justification = 'Selects a credential type by name; holds no secret')]
     [CmdletBinding()]
     param (
         $DisplayName,
         $ConnectionType,
         $CreationMethod,
         $Parameters,
+        $CredentialType = 'ServicePrincipal',
         $ServicePrincipalClientId,
         $ServicePrincipalSecret,
         $TenantId
     )
 
+    # 'type' is the connector kind; 'creationMethod' is the Power Query function that builds it.
+    # They coincide for SQL and AzureBlobs, and differ for SharePoint (SharePoint/SharePointList)
+    # and Fabric pipelines (FabricDataPipelines/FabricDataPipelines.Actions). Supplying a valid
+    # type with an invalid creation method returns "No function found matching 'X' for Kind: 'X'",
+    # which reads as though the type is wrong and sends you looking at the one thing that was right.
     if ([string]::IsNullOrEmpty($CreationMethod)) {
         $CreationMethod = $ConnectionType
     }
+
+    $credentials = _GenerateCredentialsBlock -DisplayName $DisplayName `
+                                             -CredentialType $CredentialType `
+                                             -ServicePrincipalClientId $ServicePrincipalClientId `
+                                             -ServicePrincipalSecret $ServicePrincipalSecret `
+                                             -TenantId $TenantId
 
     $createBody = @{
         connectivityType = "ShareableCloud"
@@ -77,12 +98,7 @@ function _GenerateCreateBody
             singleSignOnType = "None"
             connectionEncryption = "NotEncrypted"
             skipTestConnection = $false
-            credentials = @{
-            credentialType = "ServicePrincipal"
-            servicePrincipalClientId = $ServicePrincipalClientId
-            servicePrincipalSecret = $ServicePrincipalSecret
-            tenantId = $TenantId
-            }
+            credentials = $credentials
         }
     }
     

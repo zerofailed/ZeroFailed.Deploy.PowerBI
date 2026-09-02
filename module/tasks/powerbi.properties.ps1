@@ -16,3 +16,13 @@ $CloudConnectionFilters ??= @()
 
 # Synopsis: The path to the directory containing the cloud connection configuration files
 $CloudConnectionsConfigPath ??= ''
+
+# Synopsis: When true, suppresses credential updates for ALL connections in this run, whatever
+#           their own 'allowCredentialUpdate' setting. For converging structure without touching
+#           any secret.
+$PowerBiSkipCredentialUpdates ??= $false
+
+# Synopsis: When true, validates each connection's type, creation method and credential type
+#           against the tenant before attempting to create it, so a bad definition fails with a
+#           message naming the actual problem rather than an opaque REST error.
+$PowerBiValidateConnectionTypes ??= $true
