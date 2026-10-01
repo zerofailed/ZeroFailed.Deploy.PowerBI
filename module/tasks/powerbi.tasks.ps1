@@ -88,14 +88,19 @@ task deployPowerBISharedCloudConnection -After DeployCore {
             CreationMethod = $connection.creationMethod
             CredentialType = $credentialType
             Parameters = $connection.target
-            ServicePrincipalClientId = $connection.servicePrincipal.clientId
-            ServicePrincipalSecret = $secretValue.SecretValue
-            TenantId = $connection.servicePrincipal.tenantId
             AccessToken = $token.Token
             AllowCredentialUpdate = $connection.allowCredentialUpdate
             SkipCredentialUpdates = $PowerBiSkipCredentialUpdates
             ValidateConnectionType = $PowerBiValidateConnectionTypes
             ContinueOnError = $PowerBiContinueOnError
+        }
+
+        if ($credentialType -eq 'ServicePrincipal') {
+            $splat =+ @{
+                ServicePrincipalClientId = $connection.servicePrincipal.clientId
+                ServicePrincipalSecret = $secretValue.SecretValue
+                TenantId = $connection.servicePrincipal.tenantId
+            }
         }
 
         Write-Build White "Configuring cloud connection..."

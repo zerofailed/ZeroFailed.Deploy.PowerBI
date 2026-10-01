@@ -94,9 +94,9 @@ function Resolve-CloudConnections {
             $denormalized = @{
                 displayName = $conn.displayName
                 type = $conn.type
-                # May be $null - defaulted to 'type' downstream, preserving the behaviour of
+                # May be omitted, so apply default based on original behaviour of
                 # configurations written before this field existed.
-                creationMethod = $conn.creationMethod
+                creationMethod = $conn.ContainsKey('creationMethod') ? $conn.creationMethod : $conn.type
                 # Likewise defaulted to 'ServicePrincipal' downstream.
                 credentialType = $conn.credentialType
                 # Defaulted here rather than downstream, because '$false' and 'absent' are
@@ -112,7 +112,7 @@ function Resolve-CloudConnections {
                 $sp = _Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference $conn.useServicePrincipal
                 $denormalized.servicePrincipal = $sp
             }
-            elseif ($conn.servicePrincipal) {
+            elseif ($conn.ContainsKey('servicePrincipal')) {
                 $denormalized.servicePrincipal = $conn.servicePrincipal
             }
 

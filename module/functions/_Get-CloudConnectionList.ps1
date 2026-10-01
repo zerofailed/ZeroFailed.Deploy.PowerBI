@@ -56,10 +56,10 @@ function _Get-CloudConnectionList
 
         # continuationUri carries the fully-formed next request; fall back to composing one from
         # the token for responses that only supply that.
-        if ($response.continuationUri) {
+        if ($response.PSObject.Properties['continuationUri']) {
             $uri = $response.continuationUri
         }
-        elseif ($response.continuationToken) {
+        elseif ($response.PSObject.Properties['continuationToken']) {
             $uri = "https://api.fabric.microsoft.com/v1/connections?continuationToken=$([uri]::EscapeDataString($response.continuationToken))"
         }
         else {

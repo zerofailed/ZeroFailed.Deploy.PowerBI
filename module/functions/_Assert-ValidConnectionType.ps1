@@ -75,7 +75,7 @@ function _Assert-ValidConnectionType
         $CreationMethod = $ConnectionType
     }
 
-    if ($Force -or $null -eq $script:SupportedConnectionTypeCache) {
+    if ($Force -or $null -eq (Get-Variable -Name SupportedConnectionTypeCache -Scope Script -ErrorAction Ignore)) {
         $headers = @{
             Authorization  = "Bearer $($AccessToken | ConvertFrom-SecureString -AsPlainText)"
             'Content-type' = 'application/json'
@@ -94,10 +94,10 @@ function _Assert-ValidConnectionType
                 $supported.AddRange([object[]]$response.value)
             }
 
-            if ($response.continuationUri) {
+            if ($response.PSObject.Properties['continuationUri']) {
                 $uri = $response.continuationUri
             }
-            elseif ($response.continuationToken) {
+            elseif ($response.PSObject.Properties['continuationToken']) {
                 $uri = "https://api.fabric.microsoft.com/v1/connections/supportedConnectionTypes?showAllCreationMethods=true&continuationToken=$([uri]::EscapeDataString($response.continuationToken))"
             }
             else {
@@ -108,7 +108,7 @@ function _Assert-ValidConnectionType
         $script:SupportedConnectionTypeCache = $supported.ToArray()
     }
 
-    $supportedTypes = $script:SupportedConnectionTypeCache
+    $supportedTypes = $script:SupportedConnectionTypeCache ?? $null
 
     if (!$supportedTypes) {
         Write-Warning "Could not read the supported connection types from the tenant; skipping validation of '$DisplayName'."
