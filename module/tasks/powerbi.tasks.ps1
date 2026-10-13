@@ -96,7 +96,7 @@ task deployPowerBISharedCloudConnection -After DeployCore {
         }
 
         if ($credentialType -eq 'ServicePrincipal') {
-            $splat =+ @{
+            $splat += @{
                 ServicePrincipalClientId = $connection.servicePrincipal.clientId
                 ServicePrincipalSecret = $secretValue.SecretValue
                 TenantId = $connection.servicePrincipal.tenantId
