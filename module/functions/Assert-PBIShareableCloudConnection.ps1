@@ -107,7 +107,7 @@ function Assert-PBIShareableCloudConnection
         # The credential types that carry no secret (WorkspaceIdentity, Anonymous) have no
         # service principal, so none of the following three can be mandatory.
         [Parameter()]
-        [string] $CredentialType = 'ServicePrincipal',
+        [string] $CredentialType,
 
         [Parameter()]
         [guid] $ServicePrincipalClientId,

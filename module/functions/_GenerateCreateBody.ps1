@@ -64,7 +64,7 @@ function _GenerateCreateBody
         $ConnectionType,
         $CreationMethod,
         $Parameters,
-        $CredentialType = 'ServicePrincipal',
+        $CredentialType,
         $ServicePrincipalClientId,
         $ServicePrincipalSecret,
         $TenantId

@@ -52,7 +52,7 @@ function _GenerateCredentialsBlock
     [CmdletBinding()]
     param (
         $DisplayName,
-        $CredentialType = 'ServicePrincipal',
+        $CredentialType,
         $ServicePrincipalClientId,
         $ServicePrincipalSecret,
         $TenantId
