@@ -2,9 +2,9 @@
 document type: cmdlet
 external help file: ZeroFailed.Deploy.PowerBI-Help.xml
 HelpUri: ''
-Locale: en-GB
+Locale: en-US
 Module Name: ZeroFailed.Deploy.PowerBI
-ms.date: 11/27/2025
+ms.date: 10/14/2026
 PlatyPS schema version: 2024-05-01
 title: Get-YamlContent
 ---

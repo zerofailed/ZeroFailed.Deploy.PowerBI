@@ -2,9 +2,9 @@
 document type: cmdlet
 external help file: ZeroFailed.Deploy.PowerBI-Help.xml
 HelpUri: ''
-Locale: en-GB
+Locale: en-US
 Module Name: ZeroFailed.Deploy.PowerBI
-ms.date: 11/27/2025
+ms.date: 10/14/2026
 PlatyPS schema version: 2024-05-01
 title: Resolve-PrincipalIdentities
 ---
@@ -30,7 +30,8 @@ Resolve-PrincipalIdentities [-Identities] <Object[]> [-GraphAccessToken] <secure
 
 This function takes a mixed array of identities - either email address strings or structured objects
 with principalId and principalType properties - and resolves them to a consistent format with
-principal IDs and types. Email addresses are resolved using Microsoft Graph API.
+principal IDs and types.
+Email addresses are resolved using Microsoft Graph API.
 
 ## EXAMPLES
 
@@ -41,7 +42,6 @@ $identities = @(
     @{ principalId = "00000000-0000-0000-0000-000000000000"; principalType = "ServicePrincipal" }
 )
 $resolved = Resolve-PrincipalIdentities -Identities $identities -GraphAccessToken $graphToken
-#>
 
 ## PARAMETERS
 
@@ -68,7 +68,8 @@ HelpMessage: ''
 
 ### -Identities
 
-Array of identities to resolve. Can contain:
+Array of identities to resolve.
+Can contain:
 - Email address strings (e.g., "user@domain.com")
 - Structured objects with principalId and principalType properties
 

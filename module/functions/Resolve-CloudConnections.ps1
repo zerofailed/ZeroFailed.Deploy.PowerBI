@@ -4,6 +4,41 @@
 
 using namespace System.Collections.Generic
 
+<#
+.SYNOPSIS
+Resolves and denormalizes cloud connection configurations from YAML files.
+
+.DESCRIPTION
+This function reads a main configuration file, along with referenced service principals
+and connection targets, to produce a denormalized list of cloud connection objects.
+It handles the resolution of references and merges global settings into each connection.
+
+.PARAMETER ConfigPath
+The path to the main configuration YAML file (e.g., config.yaml).
+
+.PARAMETER ConnectionsConfigPath
+The path where the connection configuration files are stored. A relative path is resolved
+against the folder that contains the main configuration file. Defaults to 'connections'.
+
+.PARAMETER ConnectionFilter
+An array of wildcard string expressions used to filter the connections that will be processed, based on their display name.
+
+.OUTPUTS
+System.Array
+
+.EXAMPLE
+$connections = Resolve-CloudConnections -ConfigPath "C:\config\main.yaml"
+foreach ($conn in $connections) {
+    Write-Host "Connection: $($conn.displayName), Type: $($conn.type)"
+}
+
+.EXAMPLE
+$connections = Resolve-CloudConnections -ConfigPath "C:\config\main.yaml" -ConnectionFilter SQL*DEV*
+foreach ($conn in $connections) {
+    Write-Host "Connection: $($conn.displayName), Type: $($conn.type)"
+}
+#>
+
 function Resolve-CloudConnections {
     [CmdletBinding()]
     [OutputType([array])]
@@ -94,22 +129,39 @@ function Resolve-CloudConnections {
             $denormalized = @{
                 displayName = $conn.displayName
                 type = $conn.type
-                creationMethod = $conn.creationMethod
+                # May be omitted, so apply default based on original behaviour of
+                # configurations written before this field existed.
+                creationMethod = $conn.ContainsKey('creationMethod') ? $conn.creationMethod : $conn.type
+                # This may be omitted, so apply the default.
+                credentialType = $conn.ContainsKey('credentialType') ? $conn.credentialType : 'ServicePrincipal'
+                # Defaulted here rather than downstream, because '$false' and 'absent' are
+                # both falsy and cannot be told apart once the value has been copied.
+                allowCredentialUpdate = $conn.ContainsKey('allowCredentialUpdate') ? [bool]$conn.allowCredentialUpdate : $true
             }
 
-            # Resolve service principal
+            # Resolve service principal.
+            # Not every connection has one: credential types such as WorkspaceIdentity and
+            # Anonymous carry no principal at all, so the key is only added when there is
+            # something to put in it.
             if ($conn.useServicePrincipal) {
                 $sp = _Resolve-ServicePrincipal -ServicePrincipals $servicePrincipals -Reference $conn.useServicePrincipal
                 $denormalized.servicePrincipal = $sp
             }
-            else {
+            elseif ($conn.ContainsKey('servicePrincipal')) {
                 $denormalized.servicePrincipal = $conn.servicePrincipal
             }
 
-            # Apply the default tenant ID if one hasn't been specified
-            if (!$denormalized.servicePrincipal.ContainsKey('tenantId') -or [string]::IsNullOrEmpty($denormalized.servicePrincipal['tenantId'])) {
-                Write-Verbose "Applying default tenant ID to service principal: $($denormalized.servicePrincipal)"
-                $denormalized.servicePrincipal['tenantId'] = $config.settings.defaultTenantId
+            # Apply the default tenant ID if one hasn't been specified.
+            # Both halves of the condition are load-bearing: assigning $null to a hashtable key
+            # still makes ContainsKey() return true, and the previous unconditional form threw
+            # "You cannot call a method on a null-valued expression" for any connection without
+            # a service principal - aborting the whole deployment with an error naming neither
+            # the connection nor the field.
+            if ($denormalized.ContainsKey('servicePrincipal') -and $denormalized.servicePrincipal) {
+                if (!$denormalized.servicePrincipal.ContainsKey('tenantId') -or [string]::IsNullOrEmpty($denormalized.servicePrincipal['tenantId'])) {
+                    Write-Verbose "Applying default tenant ID to service principal: $($denormalized.servicePrincipal)"
+                    $denormalized.servicePrincipal['tenantId'] = $config.settings.defaultTenantId
+                }
             }
 
             # Resolve connection target
@@ -149,7 +201,10 @@ function Resolve-CloudConnections {
                 }
             }
             else {
-                $denormalized.target = $conn.target.parameters
+                # Settle the shape here rather than downstream: a connection with no parameters
+                # at all (FabricDataPipelines) must reach Assert-PBIShareableCloudConnection as
+                # an empty array, not $null.
+                $denormalized.target = $conn.target.parameters ?? @()
             }
 
             # Copy permissions

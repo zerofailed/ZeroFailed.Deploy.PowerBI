@@ -1,0 +1,37 @@
+# Fabric Cloud Connections
+#
+# These two connections are the acceptance fixtures for the Fabric connection work - see
+# docs/implementation_plan.md. Between them they exercise every capability the extension
+# previously lacked: a creation method that differs from the type, a credential type that
+# carries no secret, and a connection that opts out of credential updates.
+version: '1.0'
+
+cloudConnections:
+  # Backs a OneLake shortcut onto a SharePoint document library.
+  - displayName: EDAP_DEV_sp__hat
+    type: SharePoint
+    creationMethod: SharePointList
+    credentialType: ServicePrincipal
+    allowCredentialUpdate: false      # backs a OneLake shortcut - see README
+    useServicePrincipal: development
+    target:
+      parameters:
+        - dataType: Text
+          name: sharePointSiteUrl
+          value: https://contoso.sharepoint.com/sites/example
+    permissions:
+      users:
+        - principalId: "282de1ed-2c46-4b5b-ac1d-06bcf3b19128"
+          principalType: "Group"
+
+  # Required by every InvokePipeline activity. No secret, no parameters, no service principal.
+  - displayName: EDAP_DEV_fp__shared
+    type: FabricDataPipelines
+    creationMethod: FabricDataPipelines.Actions
+    credentialType: WorkspaceIdentity
+    target:
+      parameters: []
+    permissions:
+      users:
+        - principalId: "282de1ed-2c46-4b5b-ac1d-06bcf3b19128"
+          principalType: "Group"

@@ -2,9 +2,9 @@
 document type: cmdlet
 external help file: ZeroFailed.Deploy.PowerBI-Help.xml
 HelpUri: ''
-Locale: en-GB
+Locale: en-US
 Module Name: ZeroFailed.Deploy.PowerBI
-ms.date: 11/27/2025
+ms.date: 10/14/2026
 PlatyPS schema version: 2024-05-01
 title: Assert-PBICloudConnectionPermissionGroups
 ---
@@ -36,10 +36,10 @@ It supports both email addresses and explicit principal IDs, with automatic reso
 of email addresses to principal IDs using Microsoft Graph API.
 
 The function will:
-1. Resolve all identities in the permission groups (email addresses to principal IDs)
-1. Get current permissions from the cloud connection
-1. Calculate the delta (additions, updates, removals needed)
-1. Apply all necessary changes to achieve the desired state
+- Resolve all identities in the permission groups (email addresses to principal IDs)
+- Get current permissions from the cloud connection
+- Calculate the delta (additions, updates, removals needed)
+- Apply all necessary changes to achieve the desired state
 
 ## EXAMPLES
 
@@ -218,7 +218,7 @@ HelpMessage: ''
 ### -StrictMode
 
 Switch to enable strict synchronization.
-When enabled (default), any permissions not specified
+When set, any permissions not specified
 in the configuration will be removed.
 
 ```yaml
