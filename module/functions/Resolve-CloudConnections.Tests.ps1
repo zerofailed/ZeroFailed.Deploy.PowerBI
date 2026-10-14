@@ -35,7 +35,7 @@ Describe 'Resolve-CloudConnections' {
             $devConnection = $results | Where-Object { $_.displayName -eq 'Development Blob Storage' }
             $devConnection | Should -Not -BeNullOrEmpty
             $devConnection.type | Should -Be 'AzureBlobs'
-            $devConnection.creationMethod | Should -BeNullOrEmpty
+            $devConnection.creationMethod | Should -Be 'AzureBlobs'
             $devConnection.servicePrincipal.clientId | Should -Be '70982f14-17c2-4eb3-867d-7e68b9a902b7'
             $devConnection.target | Where-Object { $_.name -eq 'domain' } | Select-Object -ExpandProperty value | Should -Be 'blob.core.windows.net'
             $devConnection.permissions.owners | Should -Contain 'fabricadm@contoso.com'
@@ -91,13 +91,13 @@ Describe 'Resolve-CloudConnections' {
             $connection.creationMethod | Should -Be 'SharePointList'
         }
 
-        It 'Should leave the creation method unset when the connection does not declare one' {
-            # Defaulted to the type downstream, so that configurations written before this
-            # field existed keep producing the body they always did.
+        It 'Should default the creation method to the type when the connection does not declare one' {
+            # So that configurations written before this field existed keep producing the body
+            # they always did.
             $connection = Resolve-CloudConnections -ConfigPath "$testDataDir/config.yaml" -ConnectionFilter 'Development Blob Storage'
 
             $connection.type | Should -Be 'AzureBlobs'
-            $connection.creationMethod | Should -BeNullOrEmpty
+            $connection.creationMethod | Should -Be 'AzureBlobs'
         }
     }
 
