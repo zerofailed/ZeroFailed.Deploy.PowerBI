@@ -2,9 +2,9 @@
 document type: cmdlet
 external help file: ZeroFailed.Deploy.PowerBI-Help.xml
 HelpUri: ''
-Locale: en-GB
+Locale: en-US
 Module Name: ZeroFailed.Deploy.PowerBI
-ms.date: 09/02/2026
+ms.date: 10/14/2026
 PlatyPS schema version: 2024-05-01
 title: Remove-PBICloudConnectionPermissionBatch
 ---
@@ -40,7 +40,6 @@ $assignmentsToRemove = @(
     @{ id = "assignment1"; principalId = "user1" },
     @{ id = "assignment2"; principalId = "user2" }
 )
-
 $result = Remove-PBICloudConnectionPermissionBatch `
     -CloudConnectionId "connection-id" `
     -RoleAssignments $assignmentsToRemove `
@@ -82,7 +81,8 @@ HelpMessage: ''
 
 ### -BatchSize
 
-Optional batch size for processing requests. When specified, introduces a pause between batches.
+Optional batch size for processing requests.
+When specified, introduces a pause between batches.
 
 ```yaml
 Type: System.Int32

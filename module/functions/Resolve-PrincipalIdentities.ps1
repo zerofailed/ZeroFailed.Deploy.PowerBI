@@ -4,6 +4,37 @@
 
 using namespace System.Collections.Generic
 
+<#
+.SYNOPSIS
+Resolves a collection of identities (email addresses or structured objects) to principal IDs and types.
+
+.DESCRIPTION
+This function takes a mixed array of identities - either email address strings or structured objects
+with principalId and principalType properties - and resolves them to a consistent format with
+principal IDs and types. Email addresses are resolved using Microsoft Graph API.
+
+.PARAMETER Identities
+Array of identities to resolve. Can contain:
+- Email address strings (e.g., "user@domain.com")
+- Structured objects with principalId and principalType properties
+
+.PARAMETER GraphAccessToken
+Secure string containing the Microsoft Graph API access token for resolving email addresses.
+
+.PARAMETER UseCache
+Switch to enable caching of resolved identities for performance optimization.
+
+.OUTPUTS
+System.Array
+
+.EXAMPLE
+$identities = @(
+    "user@domain.com",
+    @{ principalId = "00000000-0000-0000-0000-000000000000"; principalType = "ServicePrincipal" }
+)
+$resolved = Resolve-PrincipalIdentities -Identities $identities -GraphAccessToken $graphToken
+#>
+
 function Resolve-PrincipalIdentities
 {
     [CmdletBinding()]

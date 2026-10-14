@@ -2,9 +2,9 @@
 document type: cmdlet
 external help file: ZeroFailed.Deploy.PowerBI-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/fabric/core/connections/list-connections
-Locale: en-GB
+Locale: en-US
 Module Name: ZeroFailed.Deploy.PowerBI
-ms.date: 09/02/2026
+ms.date: 10/14/2026
 PlatyPS schema version: 2024-05-01
 title: Get-FabricCloudConnection
 ---
@@ -45,6 +45,7 @@ the failure would be silent - a config object where a live one was expected.
 
 $connection = Get-FabricCloudConnection -DisplayName 'EDAP_DEV_fp__shared' -AccessToken $token
 $connection.id
+# Returns the id of an existing connection, or $null if it is not visible to this identity.
 
 ## PARAMETERS
 

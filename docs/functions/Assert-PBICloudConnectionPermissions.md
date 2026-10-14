@@ -2,9 +2,9 @@
 document type: cmdlet
 external help file: ZeroFailed.Deploy.PowerBI-Help.xml
 HelpUri: ''
-Locale: en-GB
+Locale: en-US
 Module Name: ZeroFailed.Deploy.PowerBI
-ms.date: 09/02/2026
+ms.date: 10/14/2026
 PlatyPS schema version: 2024-05-01
 title: Assert-PBICloudConnectionPermissions
 ---
@@ -13,7 +13,7 @@ title: Assert-PBICloudConnectionPermissions
 
 ## SYNOPSIS
 
-Ensures that the specified Power BI shareable cloud connection exists.
+Ensures that an identity has the specified role on a Power BI shareable cloud connection.
 
 ## SYNTAX
 
@@ -29,28 +29,22 @@ Assert-PBICloudConnectionPermissions [-CloudConnectionId] <string> [-AssigneePri
 
 ## DESCRIPTION
 
-Ensures that the specified Power BI shareable cloud connection exists.
-If the connection already exists, the function updates it;
-otherwise, it creates a new connection using the provided parameters.
+Looks up the existing role assignments on the cloud connection.
+If the identity already has a
+role assignment with a different role, the function updates it; if it has none, the function
+creates a new role assignment.
+No change is made when the identity already has the specified role.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
-# Example usage to update an existing connection or create a new one:
-$secureToken = ConvertTo-SecureString "token" -AsPlainText -Force
-$secureSecret = ConvertTo-SecureString "secret" -AsPlainText -Force
-
-$response = Assert-PBIShareableCloudConnection `
-    -DisplayName "MyConnection" `
-    -ConnectionType "ExampleType" `
-    -Parameters @{ key = "value" } `
-    -ServicePrincipalClientId "clientId" `
-    -ServicePrincipalSecret $secureSecret `
-    -TenantId "tenantId" `
-    -AccessToken $secureToken
-
-Write-Output $response
+Assert-PBICloudConnectionPermissions `
+    -CloudConnectionId "a60de636-56cf-4775-8217-76bb5b33bbb3" `
+    -AssigneePrincipalId "00000000-0000-0000-0000-000000000000" `
+    -AssigneePrincipalRole "User" `
+    -AssigneePrincipalType "ServicePrincipal" `
+    -AccessToken $fabricToken.Token
 
 ## PARAMETERS
 

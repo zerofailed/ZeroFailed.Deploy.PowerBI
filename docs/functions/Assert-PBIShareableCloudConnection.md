@@ -2,9 +2,9 @@
 document type: cmdlet
 external help file: ZeroFailed.Deploy.PowerBI-Help.xml
 HelpUri: https://learn.microsoft.com/en-us/rest/api/fabric/core/connections/create-connection
-Locale: en-GB
+Locale: en-US
 Module Name: ZeroFailed.Deploy.PowerBI
-ms.date: 09/02/2026
+ms.date: 10/14/2026
 PlatyPS schema version: 2024-05-01
 title: Assert-PBIShareableCloudConnection
 ---
@@ -57,6 +57,7 @@ default of true preserves the Key Vault secret rotation flow.
 ### EXAMPLE 1
 
 Assert-PBIShareableCloudConnection -DisplayName 'EDAP_DEV_fp__shared' -ConnectionType 'FabricDataPipelines' -CreationMethod 'FabricDataPipelines.Actions' -CredentialType 'WorkspaceIdentity' -Parameters @() -AccessToken $token
+# Creates a connection that carries no secret and no parameters.
 
 ## PARAMETERS
 
@@ -146,10 +147,6 @@ HelpMessage: ''
 
 ### -CreationMethod
 
-The creation method to use when provisioning the connection. Some connection types require a
-creation method that differs from the connection type itself (e.g. CommonDataService requires
-'CommonDataService.Database'). Defaults to the value of ConnectionType when not specified.
-The Power Query function that builds the connection.
 The Power Query function that builds the connection.
 
 ```yaml

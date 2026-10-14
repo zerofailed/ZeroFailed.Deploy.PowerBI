@@ -2,6 +2,26 @@
 # Copyright (c) Endjin Limited. All rights reserved.
 # </copyright>
 
+<#
+.SYNOPSIS
+Reads a YAML file and converts its content to a PowerShell object.
+
+.DESCRIPTION
+This function provides a convenient way to parse YAML configuration files
+into PowerShell objects, making it easy to access structured data.
+It performs a path check and includes error handling for file access or parsing issues.
+
+.PARAMETER Path
+The full or relative path to the YAML file.
+
+.OUTPUTS
+System.Object
+
+.EXAMPLE
+$config = Get-YamlContent -Path "C:\config.yaml"
+$value = $config.someKey.nestedValue
+#>
+
 function Get-YamlContent {
     [CmdletBinding()]
     [OutputType([System.Object])]

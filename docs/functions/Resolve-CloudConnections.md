@@ -2,9 +2,9 @@
 document type: cmdlet
 external help file: ZeroFailed.Deploy.PowerBI-Help.xml
 HelpUri: ''
-Locale: en-GB
+Locale: en-US
 Module Name: ZeroFailed.Deploy.PowerBI
-ms.date: 09/02/2026
+ms.date: 10/14/2026
 PlatyPS schema version: 2024-05-01
 title: Resolve-CloudConnections
 ---
@@ -95,6 +95,9 @@ HelpMessage: ''
 ### -ConnectionsConfigPath
 
 The path where the connection configuration files are stored.
+A relative path is resolved
+against the folder that contains the main configuration file.
+Defaults to 'connections'.
 
 ```yaml
 Type: System.String
