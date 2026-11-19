@@ -452,7 +452,7 @@ The rename map is in Change 8 of the proposal. Beyond it, five things this repo 
 Two current-convention fixes to make while renaming, both flagged by the `deploy-fabric` skill's
 own gotchas:
 
-- [module/dependencies.psd1](../module/dependencies.psd1) **is the legacy declaration** and duplicates
+- `module/dependencies.psd1` **is the legacy declaration** and duplicates
   `PrivateData.ZeroFailed.ExtensionDependencies` in the `.psd1` — which already exists and is
   the current form. Delete the legacy file. Follow the `author-zerofailed-extension` skill,
   which is the authority here.
